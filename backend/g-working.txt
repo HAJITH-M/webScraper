@@ -130,8 +130,6 @@ app.post('/scrape', async (req, res) => {
 });
 
 // Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
 app.post('/query', async (req, res) => {
   const { query } = req.body;
 
@@ -140,56 +138,40 @@ app.post('/query', async (req, res) => {
   }
 
   try {
-    const normalizedQuery = query.toLowerCase();
-    console.log('Normalized query:', normalizedQuery);  // Log the normalized query
+    // Search for relevant content in the database
+    const data = await prisma.scrapedData.findFirst({
+      where: {
+        content: {
+          contains: query,
+          mode: 'insensitive', // Case-insensitive search
+        },
+      },
+    });
 
-    // Get the scraped data that might be useful for the AI model
-    const scrapedData = await prisma.scrapedData.findMany(); // Get all scraped data
-
-    // If no scraped data, return a generic response
-    if (scrapedData.length === 0) {
-      return res.json({ response: 'Sorry, I do not have enough information about this site yet.' });
+    if (!data) {
+      return res.status(404).json({ response: 'No relevant data found.' });
     }
 
-    // Construct the prompt for AI model based on the content of the scraped data and URLs
-    const prompt = `
-    The user has asked: "${query}". 
-    We have the following content about this site:
-    
-    ${scrapedData.map((data, index) => {
-      return `Content from page ${index + 1}: 
-      "${data.content}"
-      Source URL: ${data.url}
-      `;
-    }).join('\n\n')}
-    
-    Please analyze the query and provide a helpful and accurate response based on the content of the website.
-    If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the website. 
-    If the query doesn't relate to the content, encourage them to ask a more specific question or provide more context.
-    If the query is related to the content of the site, provide an answer based on the site's information, and if relevant, reference the URLs.
-    `;
+    // Structuring the prompt for AI model (Google Vertex AI or Gemini)
+    const prompt = `${query}\n\nHere is some related content:\n${data.content}`;
 
-    // Send the prompt to the AI model for analysis and response
+    // Call the generateContent method from the GoogleGenerativeAI client
     const aiResult = await model.generateContent(prompt);
 
-    // Return the AI-generated response along with the URLs and scraped content
+    console.log("AI Response:", aiResult.response.text()); // Log the AI response
+
     res.json({
-      response: aiResult.response.text() || 'I couldn\'t generate a response.',
-      content: scrapedData.map((data) => data.content),
-      urls: scrapedData.map((data) => data.url), // Add URLs to the response
+      response: aiResult.response.text() || 'No AI response found.',
+      content: data.content,
     });
   } catch (error) {
-    console.error('Error during query processing:', error.message);
+    console.error("Error during query processing:", error.message);
     res.status(500).json({
-      error: 'Query failed',
+      error: "Query failed",
       details: error.message,
     });
   }
 });
 
-
-
-
 // Start the server
 app.listen(port, () => console.log(`Server running on port ${port}`));
-

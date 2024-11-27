@@ -130,8 +130,6 @@ app.post('/scrape', async (req, res) => {
 });
 
 // Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
 app.post('/query', async (req, res) => {
   const { query } = req.body;
 
@@ -140,43 +138,66 @@ app.post('/query', async (req, res) => {
   }
 
   try {
+    // Normalize the query by converting to lowercase
     const normalizedQuery = query.toLowerCase();
-    console.log('Normalized query:', normalizedQuery);  // Log the normalized query
 
-    // Get the scraped data that might be useful for the AI model
-    const scrapedData = await prisma.scrapedData.findMany(); // Get all scraped data
-
-    // If no scraped data, return a generic response
-    if (scrapedData.length === 0) {
-      return res.json({ response: 'Sorry, I do not have enough information about this site yet.' });
+    // Handling greetings
+    const greetings = ['hi', 'hello', 'hey', 'howdy'];
+    if (greetings.some(greeting => normalizedQuery.includes(greeting))) {
+      return res.json({ response: 'Hello! How can I assist you today?' });
     }
 
-    // Construct the prompt for AI model based on the content of the scraped data and URLs
-    const prompt = `
-    The user has asked: "${query}". 
-    We have the following content about this site:
-    
-    ${scrapedData.map((data, index) => {
-      return `Content from page ${index + 1}: 
-      "${data.content}"
-      Source URL: ${data.url}
-      `;
-    }).join('\n\n')}
-    
-    Please analyze the query and provide a helpful and accurate response based on the content of the website.
-    If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the website. 
-    If the query doesn't relate to the content, encourage them to ask a more specific question or provide more context.
-    If the query is related to the content of the site, provide an answer based on the site's information, and if relevant, reference the URLs.
-    `;
+    // Handling help-related queries
+    if (normalizedQuery.includes('help')) {
+      return res.json({ response: 'How can I help you? Please ask your query.' });
+    }
 
-    // Send the prompt to the AI model for analysis and response
+    // Handling site-related queries
+    if (
+      normalizedQuery.includes('what is this site about') ||
+      normalizedQuery.includes('tell me about this site') ||
+      normalizedQuery.includes('i need to get to know about this site')
+    ) {
+      // Fetch scraped data from the database to use as context
+      const scrapedData = await prisma.scrapedData.findFirst(); // Get the first content (or query more if needed)
+      if (scrapedData) {
+        // Generate a response using Google Gemini or Vertex AI model
+        const prompt = `The user asked: "${query}". Here's some content from the site: "${scrapedData.content}". Can you explain what this site is about based on this?`;
+
+        const aiResult = await model.generateContent(prompt);
+
+        // Return the AI-generated response
+        return res.json({
+          response: aiResult.response.text() || 'I couldn\'t find a clear explanation of this site.',
+        });
+      } else {
+        return res.json({ response: 'Sorry, I do not have enough information about this site yet.' });
+      }
+    }
+
+    // For other queries, search in the scraped data
+    const data = await prisma.scrapedData.findFirst({
+      where: {
+        content: {
+          contains: query,
+          mode: 'insensitive', // Case-insensitive search
+        },
+      },
+    });
+
+    if (!data) {
+      return res.status(404).json({ response: 'No relevant data found.' });
+    }
+
+    // Structuring the prompt for AI model
+    const prompt = `${query}\n\nHere's some relevant content from the site:\n${data.content}. Please generate a response based on this context.`;
+
+    // Call the NLP model to generate a response
     const aiResult = await model.generateContent(prompt);
 
-    // Return the AI-generated response along with the URLs and scraped content
     res.json({
-      response: aiResult.response.text() || 'I couldn\'t generate a response.',
-      content: scrapedData.map((data) => data.content),
-      urls: scrapedData.map((data) => data.url), // Add URLs to the response
+      response: aiResult.response.text() || 'No AI response found.',
+      content: data.content,
     });
   } catch (error) {
     console.error('Error during query processing:', error.message);
@@ -188,8 +209,5 @@ app.post('/query', async (req, res) => {
 });
 
 
-
-
 // Start the server
 app.listen(port, () => console.log(`Server running on port ${port}`));
-

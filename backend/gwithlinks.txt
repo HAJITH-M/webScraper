@@ -151,28 +151,22 @@ app.post('/query', async (req, res) => {
       return res.json({ response: 'Sorry, I do not have enough information about this site yet.' });
     }
 
-    // Construct the prompt for AI model based on the content of the scraped data and URLs
+    // Construct the prompt for AI model based on the content of the scraped data
     const prompt = `
     The user has asked: "${query}". 
     We have the following content about this site:
-    
-    ${scrapedData.map((data, index) => {
-      return `Content from page ${index + 1}: 
-      "${data.content}"
-      Source URL: ${data.url}
-      `;
-    }).join('\n\n')}
-    
+    "${scrapedData.map((data) => data.content).join(' ')}"
+
     Please analyze the query and provide a helpful and accurate response based on the content of the website.
     If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the website. 
     If the query doesn't relate to the content, encourage them to ask a more specific question or provide more context.
-    If the query is related to the content of the site, provide an answer based on the site's information, and if relevant, reference the URLs.
+    If the query is related to the content of the site, provide an answer based on the site's information.
     `;
 
     // Send the prompt to the AI model for analysis and response
     const aiResult = await model.generateContent(prompt);
 
-    // Return the AI-generated response along with the URLs and scraped content
+    // Return the AI-generated response and the list of scraped URLs
     res.json({
       response: aiResult.response.text() || 'I couldn\'t generate a response.',
       content: scrapedData.map((data) => data.content),
@@ -189,7 +183,165 @@ app.post('/query', async (req, res) => {
 
 
 
-
 // Start the server
 app.listen(port, () => console.log(`Server running on port ${port}`));
 
+
+frontend------------------------------------------------------------------------------------------------
+
+import { useState } from 'react';
+import axios from 'axios';
+import { marked } from 'marked';  // Import marked library for Markdown conversion
+
+const WebScrapper = () => {
+  const [message, setMessage] = useState(''); // URL to scrape
+  const [query, setQuery] = useState(''); // User's query
+  const [response, setResponse] = useState(''); // Response to display from server
+  const [loading, setLoading] = useState(false); // Show loading state
+  const [error, setError] = useState(''); // For handling errors
+  const [selectedQuestion, setSelectedQuestion] = useState(''); // Track selected predefined question
+
+  // Predefined questions for the user to select
+  const predefinedQuestions = [
+    'What is the purpose of this website?',
+    'Can you summarize the main content?',
+    'What are the key features of the site?',
+  ];
+
+  // Function to check if the query is a greeting
+  const isGreeting = (query) => {
+    const greetings = ['hi', 'hello', 'hey', 'hii', 'howdy'];
+    return greetings.some(greeting => query.toLowerCase().includes(greeting));
+  };
+
+  // Send the URL to the backend server for scraping
+const handleSendMessage = async () => {
+  if (!message) {
+    setError('Please enter a valid URL');
+    return; // Prevent request if the URL is empty
+  }
+
+  setError(''); // Clear any previous errors
+  setLoading(true); // Show loading indicator
+  console.log('Sending request with URL:', message); // Log the URL being sent
+
+  try {
+    // Send URL to backend for scraping
+    const res = await axios.post('http://localhost:5000/scrape', {
+      url: message,
+    });
+
+    console.log('Received response:', res.data); // Log the response from the server
+
+    // Check if the response contains valid content
+    if (Array.isArray(res.data.scrapedContent)) {
+      const formattedResponse = res.data.scrapedContent.map((item, index) => (
+        `<strong>Page ${index + 1}: <a href="${item.url}" target="_blank">${item.url}</a></strong><br /><br />${item.content}<br /><br />`
+      )).join(''); 
+
+      setResponse(formattedResponse);
+    } else {
+      setResponse('No valid content found.');
+    }
+
+  } catch (error) {
+    console.error('Error during API call:', error); // Log any errors
+    setError('Error while scraping. Please try again later.');
+    setResponse(''); // Clear the previous response if there's an error
+  } finally {
+    setLoading(false); // Hide loading indicator
+  }
+};
+
+
+  // Send the query (or selected question) to the backend for processing
+  const handleQuery = async () => {
+    const queryToSend = selectedQuestion || query;
+  
+    if (!queryToSend) {
+      setError('Please enter or select a valid query');
+      return;
+    }
+  
+    setError('');
+    setLoading(true);
+    console.log('Sending query:', queryToSend);
+  
+    try {
+      const res = await axios.post('http://localhost:5000/query', {
+        query: queryToSend,
+      });
+  
+      console.log('Received AI response:', res.data);
+  
+      // Convert the AI response from Markdown to HTML
+      const htmlResponse = marked(res.data.response);  // Convert Markdown to HTML
+  
+      // Display AI response and scraped URLs
+      let formattedResponse = `
+        <strong>AI Analysis:</strong><br />${htmlResponse}<br /><br />
+      `;
+  
+      if (res.data.urls && res.data.urls.length > 0) {
+        formattedResponse += `
+          <br /><br /><strong>Scraped URLs:</strong><br />
+          ${res.data.urls.map(url => `<a href="${url}" target="_blank">${url}</a>`).join('<br />')}
+        `;
+      }
+  
+      setResponse(formattedResponse);
+  
+    } catch (error) {
+      console.error('Error during query API call:', error);
+      setError('Error while querying. Please try again later.');
+      setResponse('');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  return (
+    <div>
+      <h1>AI-Enhanced Web Scraping</h1>
+
+      <div>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Enter URL to scrape"
+        ></textarea>
+        <button onClick={handleSendMessage} disabled={loading}>Start Scraping</button>
+      </div>
+
+      <div>
+        {/* Predefined Questions Dropdown */}
+        <select 
+          value={selectedQuestion} 
+          onChange={(e) => setSelectedQuestion(e.target.value)} 
+          disabled={loading}>
+          <option value="">Select a predefined question</option>
+          {predefinedQuestions.map((question, index) => (
+            <option key={index} value={question}>{question}</option>
+          ))}
+        </select>
+
+        {/* User Custom Query Input */}
+        <textarea
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Enter your query"
+          disabled={selectedQuestion !== ''}
+        ></textarea>
+
+        <button onClick={handleQuery} disabled={loading}>Submit Query</button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {response && <div dangerouslySetInnerHTML={{ __html: response }} />}
+    </div>
+  );
+};
+
+export default WebScrapper;
