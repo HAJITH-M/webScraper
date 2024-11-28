@@ -10,6 +10,7 @@ const FileExtractor = () => {
   const [fileText, setFileText] = useState(""); // Extracted file text
   const [query, setQuery] = useState(""); // Query input state
   const [queryResponse, setQueryResponse] = useState(""); // Query result from backend
+  const [fileTitles, setFileTitles] = useState([]); // File titles from backend
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -48,10 +49,39 @@ const FileExtractor = () => {
 
       // Pass the extracted text to the state
       setFileText(response.data.text);
+
+      // After file upload, fetch the list of files for the entered email
+      fetchFileTitles(email);
     } catch (err) {
       // Improve error handling, show server error message if available
       console.error("File upload error:", err);
       setError(err.response ? err.response.data.error : "Error uploading file.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch file titles associated with the email
+  const fetchFileTitles = async (email) => {
+    if (!email) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const backendUrl = await backEndUrl(); // Wait for the backend URL
+
+      const response = await axios.post(`${backendUrl}/api/files-by-email`, { email }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Set the file titles to state
+      setFileTitles(response.data.files || []);
+    } catch (err) {
+      console.error("Error fetching file titles:", err);
+      setError(err.response ? err.response.data.error : "Error fetching file titles.");
     } finally {
       setLoading(false);
     }
@@ -86,19 +116,39 @@ const FileExtractor = () => {
     <div>
       <h1>Chatbot with Document Upload and Query</h1>
 
-      {/* File Upload Section */}
+      {/* Email Input Section */}
       <div>
-        <input
-          type="file"
-          onChange={handleFileChange}
-          accept=".pdf,.docx" // Optional: restrict file types to PDF and DOCX
-        />
         <input
           type="email"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{ marginTop: "10px", padding: "10px", width: "100%" }}
+        />
+        <button onClick={() => fetchFileTitles(email)} disabled={loading || !email}>
+          {loading ? "Fetching Files..." : "Fetch File Titles"}
+        </button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+      </div>
+
+      {/* Display File Titles */}
+      {fileTitles.length > 0 && (
+        <div>
+          <h2>Uploaded Files</h2>
+          <ul>
+            {fileTitles.map((title, index) => (
+              <li key={index}>{title}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* File Upload Section */}
+      <div>
+        <input
+          type="file"
+          onChange={handleFileChange}
+          accept=".pdf,.docx" // Optional: restrict file types to PDF and DOCX
         />
         <button onClick={handleFileUpload} disabled={loading || !file || !email}>
           {loading ? "Uploading..." : "Upload"}

@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 const { GoogleGenerativeAI } = require('@google/generative-ai'); // Import the GoogleGenerativeAI client
 
 const fileUploadRoutes = require('./routes/fileExtractor')
+const emailFileExtractorRoutes = require('./routes/emailfileextractor')
 const app = express();
 const port = 5000;
 
@@ -33,6 +34,9 @@ app.get('/', async (req, res) => {
 
 //---api route to handle file upload
 app.use('/api', fileUploadRoutes)
+
+///---api route to handle file upload with email
+app.use('/api', emailFileExtractorRoutes)
 
 
 // Initialize the Google Generative AI client
