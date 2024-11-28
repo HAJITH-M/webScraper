@@ -8,12 +8,17 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { GoogleGenerativeAI } = require('@google/generative-ai'); // Import the GoogleGenerativeAI client
 
+const fileUploadRoutes = require('./routes/fileExtractor')
 const app = express();
 const port = 5000;
 
 // Middleware to handle CORS and JSON parsing
 app.use(cors());
 app.use(express.json());
+
+//---api route to handle file upload
+app.use('/api', fileUploadRoutes)
+
 
 // Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Use your GEMINI API key from .env
@@ -130,8 +135,7 @@ app.post('/scrape', async (req, res) => {
 });
 
 // Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
+
 app.post('/query', async (req, res) => {
   const { query } = req.body;
 
