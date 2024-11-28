@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { backEndUrl } from "../utils/BackendUrl";
-
-// This is a mock function for the backend URL, replace with actual logic
+import { backEndUrl } from "../utils/BackendUrl"; // Make sure this returns the correct backend URL
 
 const FileExtractor = () => {
   const [file, setFile] = useState(null); // Selected file
@@ -12,7 +10,15 @@ const FileExtractor = () => {
 
   // Handle file input change
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    // Optional: file type validation (check for pdf and docx)
+    if (selectedFile && (selectedFile.type === "application/pdf" || selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+      setFile(selectedFile);
+      setError(null); // Reset error on valid file
+    } else {
+      setError("Please upload a valid PDF or DOCX file.");
+      setFile(null); // Clear file if invalid
+    }
   };
 
   // Handle file upload
@@ -36,7 +42,9 @@ const FileExtractor = () => {
       // Pass the extracted text to the state
       setFileText(response.data.text);
     } catch (err) {
-      setError("Error uploading file.");
+      // Improve error handling, show server error message if available
+      console.error("File upload error:", err);
+      setError(err.response ? err.response.data.error : "Error uploading file.");
     } finally {
       setLoading(false);
     }
@@ -49,7 +57,7 @@ const FileExtractor = () => {
       {/* File Upload Section */}
       <div>
         <input type="file" onChange={handleFileChange} />
-        <button onClick={handleFileUpload} disabled={loading}>
+        <button onClick={handleFileUpload} disabled={loading || !file}>
           {loading ? "Uploading..." : "Upload"}
         </button>
         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -58,11 +66,12 @@ const FileExtractor = () => {
       {/* Display Extracted Text */}
       <div>
         <h2>Extracted Text</h2>
-        <pre>{fileText}</pre>
+        <div style={{ maxHeight: "300px", overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid #ddd", padding: "10px" }}>
+          {fileText || "No text extracted yet."}
+        </div>
       </div>
     </div>
   );
 };
 
-// Export the single component
 export default FileExtractor;
