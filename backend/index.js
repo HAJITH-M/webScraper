@@ -16,6 +16,21 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
+//---default route
+app.get('/', async (req, res) => {
+  try {
+    // Attempt to connect to the database
+    await prisma.$connect();
+    const message = "Welcome, BackEnd connected successfully";
+    res.json({message: message, success: true, status: 'OK', details: 'Connected to the database!'});
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+    res.status(500).json({success: false, status: 'ERROR', message: 'Failed to connect to the database.'});
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 //---api route to handle file upload
 app.use('/api', fileUploadRoutes)
 
@@ -195,5 +210,15 @@ app.post('/query', async (req, res) => {
 
 
 // Start the server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, async () =>{
+  try {
+    await prisma.$connect();
+    console.log('Connected to the database');
+    console.log(`Server running on port ${port}`);
+  }
+  catch (error) {
+    console.error('Error connecting to the database:', error);
+    process.exit(1);
+  }
+})
 
