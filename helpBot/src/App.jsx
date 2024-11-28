@@ -1,36 +1,23 @@
+import React from 'react';
+import WebScrapper from "./Component/WebScrapper"
 
-
-// const App = () => {
-//   return (
-//     // <WebScraper/>
-//     // <FileExtractor/>
-//   )
-// }
-
-// export default App
-
-// src/App.jsx
-import React, { useState } from "react";
-import FileUpload from "./Component/FileExtractor";
-// import FileUpload from "./components/FileUpload";
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
+import FileExtractor from './Component/FileExtractor';
 
 const App = () => {
-  const [fileText, setFileText] = useState("");
-
-  const handleFileProcessed = (text) => {
-    setFileText(text);
-  };
-
   return (
-    <div>
-      <h1>Chatbot with Document Upload</h1>
-      <FileUpload onFileProcessed={handleFileProcessed} />
-      <div>
-        <h2>Extracted Text</h2>
-        <pre>{fileText}</pre>
-      </div>
-    </div>
-  );
-};
+    <>
+    <Router>
+      <Routes>
+        <Route path="/" element={<WebScrapper />} />
+        <Route path="/fileupload" element={<FileExtractor />} />  
+      </Routes>
+    </Router>
+    </>
+    
+    
+  )
+}
 
-export default App;
+export default App
+

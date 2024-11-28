@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { marked } from 'marked';  // Import marked library for Markdown conversion
+import { backEndUrl } from '../utils/BackendUrl';
 
 const WebScrapper = () => {
   const [message, setMessage] = useState(''); // URL to scrape
