@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { backEndUrl } from "../utils/BackendUrl"; // Make sure this returns the correct backend URL
+import { backEndUrl } from "../utils/BackendUrl"; // Ensure this is returning the correct backend URL
 
 const FileExtractor = () => {
   const [file, setFile] = useState(null); // Selected file
+  const [email, setEmail] = useState(""); // Email input state
   const [loading, setLoading] = useState(false); // Loading state for both file upload and query
   const [error, setError] = useState(null); // Error state
   const [fileText, setFileText] = useState(""); // Extracted file text
@@ -23,14 +24,18 @@ const FileExtractor = () => {
     }
   };
 
-  // Handle file upload
+  // Handle file upload with email
   const handleFileUpload = async () => {
-    if (!file) return;
+    if (!file || !email) {
+      setError("Both file and email are required.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("email", email); // Include email with the request
 
     try {
       const backendUrl = await backEndUrl(); // Wait for the backend URL
@@ -83,8 +88,19 @@ const FileExtractor = () => {
 
       {/* File Upload Section */}
       <div>
-        <input type="file" onChange={handleFileChange} />
-        <button onClick={handleFileUpload} disabled={loading || !file}>
+        <input
+          type="file"
+          onChange={handleFileChange}
+          accept=".pdf,.docx" // Optional: restrict file types to PDF and DOCX
+        />
+        <input
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ marginTop: "10px", padding: "10px", width: "100%" }}
+        />
+        <button onClick={handleFileUpload} disabled={loading || !file || !email}>
           {loading ? "Uploading..." : "Upload"}
         </button>
         {error && <p style={{ color: "red" }}>{error}</p>}

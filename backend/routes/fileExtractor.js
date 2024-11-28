@@ -21,11 +21,16 @@ const upload = multer({ dest: "uploads/" });
  
 // **File Upload and Text Extraction Endpoint**
 router.post("/fileupload", upload.single("file"), async (req, res) => {
+  const { email } = req.body;  // Get the email from the request body
   const filePath = path.join(__dirname, "../", req.file.path); // Correct the path for file cleanup
   const fileExtension = path.extname(req.file.originalname).toLowerCase();
 
   try {
     console.log("File received:", req.file);  // Debug: Log received file information
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
 
     let extractedText = "";
     const title = req.file.originalname; // Title is the original file name
@@ -39,13 +44,14 @@ router.post("/fileupload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Unsupported file type" });
     }
 
-    // Create a new entry in ExtractedContent
+    // Create a new entry in ExtractedContent with email included
     const extractedContent = await prisma.extractedContent.create({
       data: {
         content: extractedText,  // The extracted content from the file
         fileName: req.file.originalname,  // The original file name
         url: req.file.path,  // Path to the uploaded file
-        title: title,  // Title of the file (you can modify this if needed)
+        title: title,  // Title of the file
+        email: email, // Store the email associated with the file
       },
     });
 
@@ -116,6 +122,7 @@ router.post("/filequery", async (req, res) => {
       "${data.content}"
       File Name: ${data.fileName}
       Title: ${data.title} 
+      Email: ${data.email}  // Include email in response
       `;
     }).join("\n\n")}
 
@@ -133,7 +140,8 @@ router.post("/filequery", async (req, res) => {
       response: aiResult.response.text() || "I couldn't generate a response.",
       content: extractedContent.map((data) => data.content),
       fileNames: extractedContent.map((data) => data.fileName), // Include file names in the response
-      titles: extractedContent.map((data) => data.title)  // Include titles in the response
+      titles: extractedContent.map((data) => data.title),  // Include titles in the response
+      emails: extractedContent.map((data) => data.email) // Include emails in the response
     });
   } catch (error) {
     console.error("Error during query processing:", error.message);
@@ -143,8 +151,5 @@ router.post("/filequery", async (req, res) => {
     });
   }
 });
-
-// Start the server
-
 
 module.exports = router;

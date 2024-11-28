@@ -15,11 +15,12 @@ model ScrapedData {
 }
 
 
+
 model ExtractedContent {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String // Store the email address associated with the file upload
   title    String  // Store the title (can be the same as the file name, or another title you extract)
   content  String
   fileName String // Store the file name from which the content was extracted
   url      String? // Optionally store the file path (URL to the uploaded file)
-  // title    String  // Store the title (can be the same as the file name, or another title you extract)
 }
