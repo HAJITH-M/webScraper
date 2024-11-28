@@ -94,42 +94,46 @@ async function extractTextFromPdf(filePath) {
 
 // **Query Processing Endpoint**
 router.post("/filequery", async (req, res) => {
-  const { query } = req.body;
+  const { query, title } = req.body; // Include 'title' in the request body
 
-  if (!query) {
-    return res.status(400).json({ error: "Query is required" });
+  if (!query || !title) {
+    return res.status(400).json({ error: "Query and file title are required" });
   }
 
   try {
     const normalizedQuery = query.toLowerCase();
     console.log("Normalized query:", normalizedQuery); // Log the normalized query
 
-    // Get all extracted content from the database (i.e., the text from the uploaded files)
-    const extractedContent = await prisma.extractedContent.findMany();
+    // Fetch the content of the selected file by its title
+    const extractedContent = await prisma.extractedContent.findMany({
+      where: {
+        title: title, // Match the selected file's title
+      },
+    });
 
-    // If no extracted content, return a generic response
+    // If no content for the selected title, return a generic response
     if (extractedContent.length === 0) {
-      return res.json({ response: "Sorry, I do not have enough information yet." });
+      return res.json({ response: `Sorry, no content found for the file titled "${title}".` });
     }
 
-    // Construct the prompt for AI model based on the extracted content from the files
+    // Construct the prompt for AI model based on the extracted content from the selected file
     const prompt = `
     The user has asked: "${query}". 
-    We have the following content from the uploaded files:
+    We have the following content from the uploaded file titled "${title}":
 
-    ${extractedContent.map((data, index) => {
-      return `Content from file ${index + 1}: 
+    ${extractedContent.map((data) => {
+      return `Content from file:
       "${data.content}"
       File Name: ${data.fileName}
-      Title: ${data.title} 
-      Email: ${data.email}  // Include email in response
+      Title: ${data.title}
+      Email: ${data.email} // Include email in response
       `;
     }).join("\n\n")}
 
-    Please analyze the query and provide a helpful and accurate response based on the content of the uploaded files.
-    If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the files.
+    Please analyze the query and provide a helpful and accurate response based on the content of this file.
+    If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the file.
     If the query doesn't relate to the content, encourage them to ask a more specific question or provide more context.
-    If the query is related to the content of the files, provide an answer based on the files' information.
+    If the query is related to the content, provide an answer based on the file's information.
     `;
 
     // Send the prompt to the AI model for analysis and response

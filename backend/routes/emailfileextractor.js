@@ -28,6 +28,37 @@ router.post("/files-by-email", async (req, res) => {
 });
 
 
-
+// Endpoint to get extracted content by file title and email
+router.post("/file-content", async (req, res) => {
+    const { email, title } = req.body;
+  
+    try {
+      if (!email || !title) {
+        return res.status(400).json({ error: "Email and title are required" });
+      }
+  
+      // Fetch the file content by email and title
+      const fileContent = await prisma.extractedContent.findFirst({
+        where: {
+          email: email,
+          title: title
+        },
+        select: {
+          content: true
+        }
+      });
+  
+      if (!fileContent) {
+        return res.status(404).json({ error: "File not found" });
+      }
+  
+      // Return the file content for AI analysis
+      res.json({ content: fileContent.content });
+    } catch (error) {
+      console.error("Error fetching file content:", error);
+      res.status(500).json({ error: "Error fetching file content" });
+    }
+  });
+  
 
 module.exports = router;
