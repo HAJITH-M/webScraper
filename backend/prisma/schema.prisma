@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,4 +12,14 @@ model ScrapedData {
   title   String
   content String
   url     String? 
+}
+
+
+model ExtractedContent {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  title    String  // Store the title (can be the same as the file name, or another title you extract)
+  content  String
+  fileName String // Store the file name from which the content was extracted
+  url      String? // Optionally store the file path (URL to the uploaded file)
+  // title    String  // Store the title (can be the same as the file name, or another title you extract)
 }
