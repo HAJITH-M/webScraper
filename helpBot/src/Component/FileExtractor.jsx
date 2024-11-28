@@ -1,6 +1,7 @@
 // src/components/FileUpload.jsx
 import React, { useState } from "react";
 import axios from "axios";
+import { backEndUrl } from "../utils/BackendUrl";
 
 const FileUpload = ({ onFileProcessed }) => {
   const [file, setFile] = useState(null);
@@ -20,7 +21,9 @@ const FileUpload = ({ onFileProcessed }) => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/upload", formData, {
+      const backendUrl = await backEndUrl(); // Wait for the backend URL
+
+      const response = await axios.post(`${backendUrl}/api/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

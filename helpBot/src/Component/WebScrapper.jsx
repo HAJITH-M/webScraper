@@ -36,7 +36,8 @@ const handleSendMessage = async () => {
 
   try {
     // Send URL to backend for scraping
-    const res = await axios.post('http://localhost:5000/scrape', {
+    const backendUrl = await backEndUrl(); // Wait for the backend URL
+    const res = await axios.post(`${backendUrl}/scrape`, {
       url: message,
     });
 
@@ -77,7 +78,8 @@ const handleSendMessage = async () => {
     console.log('Sending query:', queryToSend);
   
     try {
-      const res = await axios.post('http://localhost:5000/query', {
+      const backendUrl = await backEndUrl(); // Wait for the backend URL
+      const res = await axios.post(`${backendUrl}/query`, {
         query: queryToSend,
       });
   
