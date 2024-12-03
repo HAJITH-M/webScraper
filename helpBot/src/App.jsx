@@ -8,6 +8,7 @@ import Login from './AuthContext/Login';
 import Register from './AuthContext/Register';
 import LogOut from './AuthContext/LogOut';
 import ImageComponent from './Component/ImageComponent/ImageComponent';
+import ChatBot from './Component/ChatBot/ChatBot';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/WebScrapper" element={<PrivateRoute><WebScrapper /></PrivateRoute>} />
         <Route path="/fileupload" element={<PrivateRoute><FileExtractor /></PrivateRoute>} />  
         <Route path="/image" element={<PrivateRoute><ImageComponent /></PrivateRoute>} />  
+        <Route path="/chatbot" element={<PrivateRoute><ChatBot /></PrivateRoute>} />  
 
         <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
 

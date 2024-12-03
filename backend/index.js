@@ -14,6 +14,7 @@ const jwt = require("jsonwebtoken");
 const fileUploadRoutes = require('./routes/fileExtractor')
 const emailFileExtractorRoutes = require('./routes/emailfileextractor')
 const loginRoutes = require('./routes/Login')
+const ChatBot = require('./routes/chatBot')
 const app = express();
 const port = 5000;
 
@@ -60,6 +61,9 @@ app.use('/api', emailFileExtractorRoutes);
 
 // API route to handle login
 app.use('/api', loginRoutes);
+
+// API route to handle chatBot
+app.use('/api', ChatBot);
 
 // Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Use your GEMINI API key from .env
@@ -167,7 +171,7 @@ app.post('/scrape', authenticate, async (req, res) => {
 
 
 // Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-app.post('/query', async (req, res) => {
+app.post('/query',authenticate, async (req, res) => {
   const { query } = req.body;
 
   if (!query) {
