@@ -2,14 +2,18 @@ const express = require('express');
 const playwright = require('playwright');
 const url = require('url');
 const cors = require('cors');
-const cheerio = require('cheerio'); // For parsing HTML and extracting links
+const cheerio = require('cheerio');
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { GoogleGenerativeAI } = require('@google/generative-ai'); // Import the GoogleGenerativeAI client
 
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const fileUploadRoutes = require('./routes/fileExtractor')
 const emailFileExtractorRoutes = require('./routes/emailfileextractor')
+const loginRoutes = require('./routes/Login')
 const app = express();
 const port = 5000;
 
@@ -17,27 +21,45 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
-//---default route
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Middleware to verify JWT token
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Bearer token format
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+    req.userId = decoded.id; // Save user ID for future use
+    next();
+  });
+};
+
+// Default route
 app.get('/', async (req, res) => {
   try {
-    // Attempt to connect to the database
     await prisma.$connect();
     const message = "Welcome, BackEnd connected successfully";
-    res.json({message: message, success: true, status: 'OK', details: 'Connected to the database!'});
+    res.json({ message: message, success: true, status: 'OK', details: 'Connected to the database!' });
   } catch (error) {
     console.error('Error connecting to the database:', error);
-    res.status(500).json({success: false, status: 'ERROR', message: 'Failed to connect to the database.'});
+    res.status(500).json({ success: false, status: 'ERROR', message: 'Failed to connect to the database.' });
   } finally {
     await prisma.$disconnect();
   }
 });
 
-//---api route to handle file upload
-app.use('/api', fileUploadRoutes)
+// API route to handle file upload
+app.use('/api', fileUploadRoutes);
 
-///---api route to handle file upload with email
-app.use('/api', emailFileExtractorRoutes)
+// API route to handle file upload with email
+app.use('/api', emailFileExtractorRoutes);
 
+// API route to handle login
+app.use('/api', loginRoutes);
 
 // Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Use your GEMINI API key from .env
@@ -48,14 +70,10 @@ const extractInternalLinks = (baseUrl, pageContent, visited) => {
   const $ = cheerio.load(pageContent);
   const links = [];
 
-  // Find all anchor tags with href attributes
   $('a').each((_, element) => {
     let href = $(element).attr('href');
     if (href) {
-      // Resolve relative links to absolute ones
       const absoluteUrl = url.resolve(baseUrl, href);
-
-      // Ensure it's part of the same domain and not external, also check if it's already visited
       if (absoluteUrl.startsWith(baseUrl) && !visited.has(absoluteUrl)) {
         links.push(absoluteUrl); // Only keep links from the same domain
       }
@@ -70,7 +88,6 @@ const scrapePage = async (pageUrl, browser) => {
   const page = await browser.newPage();
   await page.goto(pageUrl, { waitUntil: 'domcontentloaded' });
 
-  // Get the full HTML content of the page
   const pageContent = await page.content(); // Playwright fetches the full HTML
   const title = await page.title();
   const textContent = await page.evaluate(() => document.body.innerText);
@@ -98,15 +115,12 @@ const crawlAndScrape = async (startUrl, browser) => {
 
     try {
       console.log('Visiting:', currentUrl); // Log the URL being visited
-      // Scrape the current page
       const pageData = await scrapePage(currentUrl, browser);
       scrapedContent.push(pageData);
 
-      // Get the internal links on this page
       const links = extractInternalLinks(currentUrl, pageData.html, visited);
       console.log('Found links:', links); // Log the links found on the page
 
-      // Add new links to the queue
       links.forEach(link => {
         if (!visited.has(link)) {
           toVisit.push(link);
@@ -120,8 +134,8 @@ const crawlAndScrape = async (startUrl, browser) => {
   return scrapedContent;
 };
 
-// Route to scrape content from the provided URL
-app.post('/scrape', async (req, res) => {
+
+app.post('/scrape', authenticate, async (req, res) => {
   const { url: startUrl } = req.body;
 
   if (!startUrl) {
@@ -133,13 +147,13 @@ app.post('/scrape', async (req, res) => {
     const scrapedContent = await crawlAndScrape(startUrl, browser);
     await browser.close();
 
-    // Save scraped data to the database
     for (const page of scrapedContent) {
       await prisma.scrapedData.create({
         data: {
           title: page.title,
           content: page.content,
           url: page.url,
+          userId: req.userId, // Save data for the logged-in user
         },
       });
     }
@@ -148,13 +162,11 @@ app.post('/scrape', async (req, res) => {
   } catch (error) {
     console.error('Error during scraping:', error);
     res.status(500).json({ error: 'Failed to scrape the URL. Please try again later.' });
-  } finally {
-    await prisma.$disconnect();
   }
 });
 
-// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
 
+// Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
 app.post('/query', async (req, res) => {
   const { query } = req.body;
 
@@ -210,19 +222,14 @@ app.post('/query', async (req, res) => {
   }
 });
 
-
-
-
 // Start the server
-app.listen(port, async () =>{
+app.listen(port, async () => {
   try {
     await prisma.$connect();
     console.log('Connected to the database');
     console.log(`Server running on port ${port}`);
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error connecting to the database:', error);
     process.exit(1);
   }
-})
-
+});

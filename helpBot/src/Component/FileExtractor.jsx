@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { marked } from "marked"; // Import marked library for Markdown conversion
 import DOMPurify from "dompurify"; // Import DOMPurify for sanitizing the HTML
@@ -8,13 +8,23 @@ import { backEndUrl } from "../utils/BackendUrl"; // Ensure this is returning th
 const FileExtractor = () => {
   const [file, setFile] = useState(null); // Selected file
   const [email, setEmail] = useState(""); // Email input state
-  const [loading, setLoading] = useState(false); // Loading state for both file upload and query
+  const [loadingUpload, setLoadingUpload] = useState(false); // Loading state for file upload
+  const [loadingQuery, setLoadingQuery] = useState(false); // Loading state for querying
   const [error, setError] = useState(null); // Error state
   const [fileText, setFileText] = useState(""); // Extracted file text
   const [query, setQuery] = useState(""); // Query input state
   const [queryResponse, setQueryResponse] = useState(""); // Query result from backend
   const [fileTitles, setFileTitles] = useState([]); // File titles from backend
   const [selectedFile, setSelectedFile] = useState(null); // File selected for AI analysis
+
+  // On component mount, get the email from local storage and fetch file titles automatically
+  useEffect(() => {
+    const userEmail = localStorage.getItem("userEmail"); // Assuming the email is stored as 'userEmail' in localStorage
+    if (userEmail) {
+      setEmail(userEmail); // Set email from localStorage if available
+      fetchFileTitles(userEmail); // Automatically fetch file titles once email is set
+    }
+  }, []);
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -35,7 +45,7 @@ const FileExtractor = () => {
       setError("Both file and email are required.");
       return;
     }
-    setLoading(true);
+    setLoadingUpload(true);
     setError(null);
 
     const formData = new FormData();
@@ -60,7 +70,7 @@ const FileExtractor = () => {
       console.error("File upload error:", err);
       setError(err.response ? err.response.data.error : "Error uploading file.");
     } finally {
-      setLoading(false);
+      setLoadingUpload(false);
     }
   };
 
@@ -68,7 +78,7 @@ const FileExtractor = () => {
   const fetchFileTitles = async (email) => {
     if (!email) return;
 
-    setLoading(true);
+    setLoadingUpload(true); // Can use same loading for fetching files
     setError(null);
 
     try {
@@ -86,7 +96,7 @@ const FileExtractor = () => {
       console.error("Error fetching file titles:", err);
       setError(err.response ? err.response.data.error : "Error fetching file titles.");
     } finally {
-      setLoading(false);
+      setLoadingUpload(false);
     }
   };
 
@@ -102,7 +112,7 @@ const FileExtractor = () => {
   const fetchFileContent = async (title) => {
     if (!email || !title) return;
 
-    setLoading(true);
+    setLoadingQuery(true);
     setError(null);
 
     try {
@@ -120,7 +130,7 @@ const FileExtractor = () => {
       console.error("Error fetching file content:", err);
       setError(err.response ? err.response.data.error : "Error fetching file content.");
     } finally {
-      setLoading(false);
+      setLoadingQuery(false);
     }
   };
 
@@ -128,7 +138,7 @@ const FileExtractor = () => {
   const handleQuerySubmit = async () => {
     if (!query || !selectedFile || !fileText) return;
 
-    setLoading(true);
+    setLoadingQuery(true);
     setError(null);
 
     // Check if the query is asking for the meaning of a word
@@ -174,7 +184,7 @@ const FileExtractor = () => {
       console.error("Query error:", err);
       setError(err.response ? err.response.data.error : "Error processing query.");
     } finally {
-      setLoading(false);
+      setLoadingQuery(false);
     }
   };
 
@@ -192,14 +202,10 @@ const FileExtractor = () => {
       <div>
         <input
           type="email"
-          placeholder="Enter your email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          readOnly // Make email input read-only
           style={{ marginTop: "10px", padding: "10px", width: "100%" }}
         />
-        <button onClick={() => fetchFileTitles(email)} disabled={loading || !email}>
-          {loading ? "Fetching Files..." : "Fetch File Titles"}
-        </button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
 
@@ -208,9 +214,9 @@ const FileExtractor = () => {
         <div>
           <h2>Uploaded Files</h2>
           <ul>
-            {fileTitles.map((title, index) => (
-              <li key={index} onClick={() => handleFileSelect(title)} style={{ cursor: "pointer", color: "blue" }}>
-                {title}
+            {fileTitles.map((file, index) => (
+              <li key={index} onClick={() => handleFileSelect(file.title)} style={{ cursor: "pointer", color: "blue" }}>
+                {file.title}
               </li>
             ))}
           </ul>
@@ -224,8 +230,8 @@ const FileExtractor = () => {
           onChange={handleFileChange}
           accept=".pdf,.docx" // Optional: restrict file types to PDF and DOCX
         />
-        <button onClick={handleFileUpload} disabled={loading || !file || !email}>
-          {loading ? "Uploading..." : "Upload"}
+        <button onClick={handleFileUpload} disabled={loadingUpload || !file || !email}>
+          {loadingUpload ? "Uploading..." : "Upload"}
         </button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
@@ -234,34 +240,32 @@ const FileExtractor = () => {
       <div>
         <h2>Extracted Text</h2>
         <div style={{ maxHeight: "300px", overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid #ddd", padding: "10px" }}>
-          {fileText || "No text extracted yet."}
+          {fileText || "No extracted text available."}
         </div>
       </div>
 
       {/* Query Section */}
       <div>
         <h2>Ask a Question</h2>
-        <textarea
+        <input
+          type="text"
+          placeholder="Enter your query"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask something about the uploaded files..."
-          rows={4}
-          style={{ width: "100%", padding: "10px", border: "1px solid #ddd" }}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
         />
-        <button onClick={handleQuerySubmit} disabled={loading || !query || !selectedFile}>
-          {loading ? "Processing..." : "Submit Query"}
+        <button onClick={handleQuerySubmit} disabled={loadingQuery || !query}>
+          {loadingQuery ? "Processing..." : "Ask"}
         </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
 
       {/* Display Query Response */}
-      <div>
-        <h2>Response</h2>
-        <div
-          style={{ maxHeight: "300px", overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid #ddd", padding: "10px" }}
-          dangerouslySetInnerHTML={renderMarkdown(queryResponse)} // Render sanitized markdown response
-        />
-      </div>
+      {queryResponse && (
+        <div>
+          <h2>Response</h2>
+          <div dangerouslySetInnerHTML={renderMarkdown(queryResponse)} />
+        </div>
+      )}
     </div>
   );
 };

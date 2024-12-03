@@ -18,7 +18,7 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // Setup file upload using multer
 const upload = multer({ dest: "uploads/" });
- 
+
 // **File Upload and Text Extraction Endpoint**
 router.post("/fileupload", upload.single("file"), async (req, res) => {
   const { email } = req.body;  // Get the email from the request body
@@ -44,14 +44,21 @@ router.post("/fileupload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Unsupported file type" });
     }
 
-    // Create a new entry in ExtractedContent with email included
+    // Find or create the User based on the email
+    const user = await prisma.user.upsert({
+      where: { email: email },
+      update: {}, // No update necessary since we're just associating this user
+      create: { email: email, password: "default_password" }, // Use a default password (or ensure user creation logic is valid)
+    });
+
+    // Create a new entry in ExtractedContent with the associated userId
     const extractedContent = await prisma.extractedContent.create({
       data: {
         content: extractedText,  // The extracted content from the file
         fileName: req.file.originalname,  // The original file name
         url: req.file.path,  // Path to the uploaded file
         title: title,  // Title of the file
-        email: email, // Store the email associated with the file
+        userId: user.id, // Store the userId in ExtractedContent
       },
     });
 
@@ -59,7 +66,7 @@ router.post("/fileupload", upload.single("file"), async (req, res) => {
     res.json({ text: extractedText, extractedContent: extractedContent });
   } catch (err) {
     console.error("Error processing file:", err);  // Debug: Log the error
-    res.status(500).json({ error: "Error processing file" });
+    res.status(500).json({ error: "Error processing file", details: err.message });
   } finally {
     // Clean up the uploaded file
     if (fs.existsSync(filePath)) {
@@ -102,12 +109,15 @@ router.post("/filequery", async (req, res) => {
 
   try {
     const normalizedQuery = query.toLowerCase();
-    console.log("Normalized query:", normalizedQuery); // Log the normalized query
+    console.log("Normalized query:", normalizedQuery); // Log the normalized query for debugging
 
-    // Fetch the content of the selected file by its title
+    // Fetch the extracted content from the database based on the title
     const extractedContent = await prisma.extractedContent.findMany({
       where: {
         title: title, // Match the selected file's title
+      },
+      include: {
+        user: true, // Include user information for email retrieval
       },
     });
 
@@ -119,14 +129,14 @@ router.post("/filequery", async (req, res) => {
     // Construct the prompt for AI model based on the extracted content from the selected file
     const prompt = `
     The user has asked: "${query}". 
-    We have the following content from the uploaded file titled "${title}":
+    We have the following content from the uploaded file titled "${title}": 
 
     ${extractedContent.map((data) => {
       return `Content from file:
       "${data.content}"
       File Name: ${data.fileName}
       Title: ${data.title}
-      Email: ${data.email} // Include email in response
+      Email: ${data.user ? data.user.email : "Unknown Email"} 
       `;
     }).join("\n\n")}
 
@@ -145,7 +155,7 @@ router.post("/filequery", async (req, res) => {
       content: extractedContent.map((data) => data.content),
       fileNames: extractedContent.map((data) => data.fileName), // Include file names in the response
       titles: extractedContent.map((data) => data.title),  // Include titles in the response
-      emails: extractedContent.map((data) => data.email) // Include emails in the response
+      emails: extractedContent.map((data) => data.user ? data.user.email : "Unknown Email") // Include emails in the response
     });
   } catch (error) {
     console.error("Error during query processing:", error.message);
@@ -156,4 +166,78 @@ router.post("/filequery", async (req, res) => {
   }
 });
 
+// Endpoint to get file titles by email
+router.post("/files-by-email", async (req, res) => {
+  const { email } = req.body;  // Get the email from the request body
+  
+  try {
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Find the user by email
+    const user = await prisma.user.findUnique({
+      where: { email: email },  // Find user by email
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Query the database for files associated with the user
+    const files = await prisma.extractedContent.findMany({
+      where: { userId: user.id },  // Fetch files based on userId
+      select: { title: true, fileName: true, createdAt: true },
+    });
+
+    // Return the list of files
+    res.json({ files: files });
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    res.status(500).json({ error: "Error fetching files" });
+  }
+});
+
+// Endpoint to get extracted content by file title and email
+router.post("/file-content", async (req, res) => {
+  const { email, title } = req.body;
+
+  try {
+    if (!email || !title) {
+      return res.status(400).json({ error: "Email and title are required" });
+    }
+
+    // Fetch the user by email to get their userId
+    const user = await prisma.user.findUnique({
+      where: { email: email }, // Find the user by email
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Fetch the file content by title and userId (from the User model)
+    const fileContent = await prisma.extractedContent.findFirst({
+      where: {
+        userId: user.id,  // Filter by userId (based on the email)
+        title: title,      // Filter by file title
+      },
+      select: {
+        content: true,  // Only select the content of the file
+      },
+    });
+
+    if (!fileContent) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // Return the file content for AI analysis
+    res.json({ content: fileContent.content });
+  } catch (error) {
+    console.error("Error fetching file content:", error);
+    res.status(500).json({ error: "Error fetching file content" });
+  }
+});
+
 module.exports = router;
+ 

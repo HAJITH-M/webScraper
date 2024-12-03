@@ -7,20 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ScrapedData {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  title   String
-  content String
-  url     String? 
+model User {
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  email            String            @unique
+  password         String
+  username         String?
+  createdAt        DateTime          @default(now())
+  extractedContent ExtractedContent[] // Relation to ExtractedContent (uploaded files)
+  scrapedData      ScrapedData[]     // Relation to ScrapedData (scraped data)
 }
 
-
-
 model ExtractedContent {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  email    String // Store the email address associated with the file upload
-  title    String  // Store the title (can be the same as the file name, or another title you extract)
-  content  String
-  fileName String // Store the file name from which the content was extracted
-  url      String? // Optionally store the file path (URL to the uploaded file)
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String   // Title of the uploaded file
+  content   String   // Extracted content from the file
+  fileName  String   // Original file name
+  url       String?  // Optional URL for the file location
+  userId    String?  @db.ObjectId // Foreign key to the User model, made nullable
+  user      User?    @relation(fields: [userId], references: [id]) // Relation to the User model
+  createdAt DateTime @default(now())
+}
+
+model ScrapedData {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  url       String? 
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
