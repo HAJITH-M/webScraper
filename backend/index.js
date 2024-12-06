@@ -237,3 +237,9 @@ app.listen(port, async () => {
     process.exit(1);
   }
 });
+
+
+
+module.exports = (req, res) => {
+  app(req, res);
+};

@@ -6,33 +6,48 @@ import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import './ChatBot.css';
 
-const ChatBot = () => {
+const ChatBot = () => { 
     const [query, setQuery] = useState('');
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const sendQuery = async () => {
-        if (!query.trim()) return;
+    // Retrieve userEmail from localStorage
+    const email = localStorage.getItem('userEmail');  // Assuming you stored the email under 'userEmail'
 
+    const sendQuery = async () => {
+        if (!query.trim()) return;  // Make sure query is not empty
+    
         setMessages((prevMessages) => [
             ...prevMessages,
             { text: query, sender: 'user' },
         ]);
         setQuery('');
         setLoading(true);
-
+    
         try {
             const backendUrl = await backEndUrl();
+            if (!email) {  // Check if email is available in localStorage
+                console.error("Email is not found in localStorage!");
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    { text: "Email is missing. Please log in again.", sender: 'bot' },
+                ]);
+                return;
+            }
             const response = await fetch(`${backendUrl}/api/chatbot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query }),
+                body: JSON.stringify({ query, email }),  // Send email to backend
             });
-
+    
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+    
             const data = await response.json();
-
+    
             setMessages((prevMessages) => [
                 ...prevMessages,
                 { text: data.response, sender: 'bot' },
@@ -47,7 +62,7 @@ const ChatBot = () => {
             setLoading(false);
         }
     };
-
+    
     // Automatically scroll to the bottom when messages change
     useEffect(() => {
         const messagesContainer = document.querySelector(".messages");
@@ -69,7 +84,7 @@ const ChatBot = () => {
                                     return !inline ? (
                                         <div>
                                             <CopyToClipboard text={children}>
-                                                <button style={{ marginBottom: '10px', padding: '5px 10px', cursor: 'pointer' }}>
+                                                <button style={{ marginBottom: '10px', padding: '5px 10px', cursor: 'pointer' }} >
                                                     Copy Code
                                                 </button>
                                             </CopyToClipboard>

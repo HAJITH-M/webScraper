@@ -15,6 +15,7 @@ model User {
   createdAt        DateTime          @default(now())
   extractedContent ExtractedContent[] // Relation to ExtractedContent (uploaded files)
   scrapedData      ScrapedData[]     // Relation to ScrapedData (scraped data)
+  chatHistories    ChatHistory[]     // New relation to store chatbot interactions
 }
 
 model ExtractedContent {
@@ -36,4 +37,14 @@ model ScrapedData {
   userId    String   @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+}
+
+// New model for chat history
+model ChatHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  query     String   // The user's query
+  response  String   // The chatbot's response
+  userId    String   @db.ObjectId // Foreign key to the User model
+  user      User     @relation(fields: [userId], references: [id]) // Relation to the User model
+  createdAt DateTime @default(now())  // Timestamp for when the message was exchanged
 }
