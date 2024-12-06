@@ -7,14 +7,8 @@
       }
     ],
     "env": {
-      "GEMINI_API_KEY": "@your-gemini-api-key", 
+      "GEMINI_API_KEY": "@your-gemini-api-key",  
       "DATABASE_URL": "@your-database-url"       
-    },
-    "functions": {
-      "index.js": {
-        "maxDuration": 120,  
-        "memory": 1024       
-      }
     },
     "routes": [
       {
