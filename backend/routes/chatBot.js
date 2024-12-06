@@ -101,4 +101,4 @@ module.exports = (req, res) => {
   };
 
 // Export the router
-// module.exports = router;
+module.exports = router;
