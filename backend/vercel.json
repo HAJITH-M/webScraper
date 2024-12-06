@@ -7,8 +7,9 @@
       }
     ],
     "env": {
-      "GEMINI_API_KEY": "@your-gemini-api-key",  
-      "DATABASE_URL": "@your-database-url"       
+      "GEMINI_API_KEY": "@GEMINI_API_KEY",  
+      "DATABASE_URL": "@DATABASE_URL",       
+      "JWT_SECRET": "@JWT_SECRET"
     },
     "routes": [
       {
