@@ -2,17 +2,13 @@
     "version": 2,
     "builds": [
       {
-        "src": "./index.js",
+        "src": "index.js",
         "use": "@vercel/node"
       }
     ],
-    "build": {
-      "env": {
-        "PRISMA_GENERATE": "true",
-        "GEMINI_API_KEY": "@your-gemini-api-key",  
-        "DATABASE_URL": "@your-database-url"       
-      },
-      "postinstall": "npx prisma generate"  
+    "env": {
+      "GEMINI_API_KEY": "@your-gemini-api-key", 
+      "DATABASE_URL": "@your-database-url"       
     },
     "functions": {
       "index.js": {
