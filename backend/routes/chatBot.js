@@ -96,5 +96,9 @@ router.post("/chatbot", async (req, res) => {
 });
 
 
+module.exports = (req, res) => {
+    app(req, res);
+  };
+
 // Export the router
 module.exports = router;

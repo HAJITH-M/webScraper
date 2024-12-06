@@ -78,4 +78,9 @@ router.post("/file-content1", async (req, res) => {
   }
 });
 
+
+module.exports = (req, res) => {
+  app(req, res);
+};
+
 module.exports = router;
