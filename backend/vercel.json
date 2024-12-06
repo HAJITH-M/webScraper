@@ -6,7 +6,11 @@
         "use": "@vercel/node"
       }
     ],
-    
+    "build": {
+      "env": {
+        "PRISMA_GENERATE": "true"  
+      }
+    },
     "routes": [
       {
         "src": "(.*)",
