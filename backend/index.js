@@ -227,10 +227,6 @@ app.post('/query',authenticate, async (req, res) => {
 });
 
 
-module.exports = (req, res) => {
-  app(req, res);
-};
-
 
 // Start the server
 app.listen(port, async () => {
