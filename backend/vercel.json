@@ -11,11 +11,12 @@
         "PRISMA_GENERATE": "true",
         "GEMINI_API_KEY": "@your-gemini-api-key",  
         "DATABASE_URL": "@your-database-url"       
-      }
+      },
+      "postinstall": "npx prisma generate"  
     },
     "functions": {
       "index.js": {
-        "maxDuration": 120, 
+        "maxDuration": 120,  
         "memory": 1024       
       }
     },
