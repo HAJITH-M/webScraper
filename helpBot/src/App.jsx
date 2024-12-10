@@ -9,6 +9,7 @@ import Register from './AuthContext/Register';
 import LogOut from './AuthContext/LogOut';
 import ImageComponent from './Component/ImageComponent/ImageComponent';
 import ChatBot from './Component/ChatBot/ChatBot';
+import HomeComponent from './Component/HomeComponent/HomeComponent';
 
 const App = () => {
   return (
@@ -22,8 +23,10 @@ const App = () => {
 
         <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
 
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Register />} />
+        <Route path="/" element={<HomeComponent />} />
+
       </Routes>
     </Router>
     </>

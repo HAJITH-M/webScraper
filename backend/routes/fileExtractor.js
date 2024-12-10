@@ -237,12 +237,10 @@ router.post("/file-content", async (req, res) => {
     console.error("Error fetching file content:", error);
     res.status(500).json({ error: "Error fetching file content" });
   }
-});
+}); 
 
 
-module.exports = (req, res) => {
-  app(req, res);
-};
+
 
 module.exports = router;
  

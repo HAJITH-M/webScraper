@@ -18,6 +18,8 @@ model User {
   chatHistories    ChatHistory[]     // New relation to store chatbot interactions
 }
 
+
+
 model ExtractedContent {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String   // Title of the uploaded file
@@ -40,11 +42,16 @@ model ScrapedData {
 }
 
 // New model for chat history
+
 model ChatHistory {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   query     String   // The user's query
   response  String   // The chatbot's response
   userId    String   @db.ObjectId // Foreign key to the User model
   user      User     @relation(fields: [userId], references: [id]) // Relation to the User model
+  sessionId String?   // Unique session ID for each conversation
   createdAt DateTime @default(now())  // Timestamp for when the message was exchanged
+  sessionName String?
 }
+
+

@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { useEffect } from 'react';
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Stars } from "@react-three/drei";
+import { motion } from "framer-motion";
 import { backEndUrl } from "../utils/BackendUrl";
-// import backEndUrls from "../utils/urls";// import { backendURL } from "../utils/urls";
+
+const AnimatedSphere = () => {
+  return (
+    <mesh>
+      <sphereGeometry args={[1, 32, 32]} />
+      <meshStandardMaterial color="#8b5cf6" wireframe />
+    </mesh>
+  );
+};
+
 const Register = () => {
-  useEffect(() => {
-    AOS.init({
-      duration: 1000, // You can customize the animation duration
-    });
-  }, []);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -20,8 +24,17 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
-
   const router = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      router('/webscrapper');
+    }
+    else {
+      router('/');
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,9 +42,8 @@ const Register = () => {
       ...formData,
       [name]: value,
     });
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" })); // Clear individual field errors
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
-  
 
   const validateForm = () => {
     const newErrors = {};
@@ -61,7 +73,7 @@ const Register = () => {
         const response = await axios.post(`${backEndUrls}/api/signup`, formData);
         
         if (response.data.token) {
-          localStorage.setItem("token", response.data.token); // Store token
+          localStorage.setItem("token", response.data.token);
           localStorage.setItem('userEmail', formData.email); 
           toast.success("Registered and Logged In Successfully");
           router("/", { replace: true });         
@@ -71,8 +83,7 @@ const Register = () => {
         }
       } catch (error) {
         console.error("Error during sign up:", error);
-        
-        // Show more specific error message
+        toast.error("Registration failed. Please try again.");
         if (error.response) {
           console.error("Response error:", error.response);
           setErrors({
@@ -85,77 +96,103 @@ const Register = () => {
         }
       }
     }
-};
-
-  
+  };
 
   return (
-    <div className="w-[90%] mx-auto max-w-md mt-10 bg-white p-6 rounded-lg shadow-lg" data-aos="flip-right">
-      <h2 className="text-2xl font-semibold text-center mb-4">Sign Up</h2>
-      <div className="grid grid-cols-2 gap-4">
-        {/* <img
-          src="https://ik.imagekit.io/a2gpaui9b/cake%20shop/Screenshot%202024-10-06%20162143.png?updatedAt=1728212092849"
-          alt="master img"
-          className="sm:order-2 md:order-2 lg:order-2 sm:h-72 md:h-80 lg:h-80 rounded-lg"
-          data-aos="fade-left"
-        /> */}
-        <form onSubmit={handleSubmit} className="space-y-4" data-aos="fade-right">
-          <div>
-            <label className="block text-gray-700">Name</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Enter your name"
-            />
-            {errors.username && <p className="text-red-500">{errors.username}</p>}
-          </div>
-          <div>
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Enter your email"
-            />
-            {errors.email && <p className="text-red-500">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Enter your password"
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password}</p>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-[#DE8816] to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:from-orange-400 hover:to-orange-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-            Sign Up
-          </button>
-
-          <h1 className="text-sm text-muted-foreground text-center">
-            Already a user ?{" "}
-            <span
-              onClick={() => router("/login")}
-              className="cursor-pointer text-[#DE8816] underline"
-            >
-              Login
-            </span>
-          </h1>
-        </form>
+    <div className="min-h-screen w-full bg-gradient-to-b from-violet-100 via-purple-50 to-violet-200 p-3 flex items-center justify-center overflow-x-hidden relative">
+      <div className="absolute inset-0 w-full h-full">
+        <Canvas>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          <Stars count={5000} factor={5} fade speed={1} />
+          <OrbitControls enableZoom={false} autoRotate />
+          <AnimatedSphere />
+        </Canvas>
       </div>
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+        className="relative w-full max-w-md z-10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-300 via-purple-300 to-pink-300 rounded-2xl transform rotate-2 blur-lg opacity-60 animate-pulse"></div>
+        <div className="relative bg-white/90 rounded-xl p-6 shadow-2xl border border-violet-200 backdrop-blur-sm hover:border-purple-400 transition-all duration-300">
+          <motion.h1
+            initial={{ y: -20 }}
+            animate={{ y: 0 }}
+            className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 mb-6 text-center"
+          >
+            Sign Up
+          </motion.h1>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="w-full pl-12 pr-4 py-3 text-gray-700 bg-white/50 border border-violet-200 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                placeholder="Enter your name"
+              />
+              {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+            </div>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </span>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full pl-12 pr-4 py-3 text-gray-700 bg-white/50 border border-violet-200 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                placeholder="Enter your email"
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            </div>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </span>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full pl-12 pr-4 py-3 text-gray-700 bg-white/50 border border-violet-200 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                placeholder="Enter your password"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 text-white font-semibold bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            >
+              Sign Up
+            </button>
+            <div className="text-center mt-4">
+              <span className="text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-purple-600 hover:text-purple-700 transition-colors duration-300"
+                >
+                  Sign in
+                </Link>
+              </span>
+            </div>
+          </form>
+        </div>
+      </motion.div>
     </div>
   );
 };

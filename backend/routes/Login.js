@@ -9,8 +9,6 @@ const router = express.Router();
 // Middleware to verify JWT
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-
-
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
   
@@ -20,7 +18,7 @@ router.post('/login', async (req, res) => {
       });
   
       if (user && await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.json({ token });
       } else {
         res.status(401).json({ error: 'Invalid credentials' });

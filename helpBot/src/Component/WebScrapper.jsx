@@ -15,6 +15,7 @@ const WebScrapper = () => {
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [showScraper, setShowScraper] = useState(false);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -23,6 +24,7 @@ const WebScrapper = () => {
     "Can you summarize the main content?",
     "What are the key features of the site?",
   ];
+
 
   const handleSendMessage = async () => {
     if (!message) {
@@ -93,7 +95,6 @@ const WebScrapper = () => {
   
       let formattedResponse = `
         <strong>AI Analysis:</strong><br />${sanitizedResponse}<br /><br />
-        <strong>Original Content:</strong><br />${res.data.content.join("<br /><br />")}
       `;
   
       if (res.data.urls && res.data.urls.length > 0) {
@@ -135,58 +136,100 @@ const WebScrapper = () => {
   }, [selectedQuestion]);
 
   return (
-    <div>
-      <h1>AI-Enhanced Web Scraping</h1>
-      <Link to="/">
-        <button
-          onClick={toggleMenu}
-          onMouseEnter={() => setHoveredItem("logout")}
-          onMouseLeave={() => setHoveredItem(null)}
-        >
-          {hoveredItem === "logout" && <PiSignOutDuotone />}
-          <span>Logout</span>
-        </button>
-      </Link>
-
-      <div>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Enter URL to scrape"
-        />
-        <button onClick={handleSendMessage} disabled={loading}>
-          Start Scraping
-        </button>
+    <div className="flex">
+      <div className="w-1/4 bg-gray-800 text-white h-screen p-4">
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Menu</h2>
+          <button
+            className="w-full text-left p-2 hover:bg-gray-700 rounded transition-colors"
+            onClick={() => {
+              setMessage("");
+              setShowScraper(!showScraper);
+            }}
+          >
+            Start Scraping
+          </button>
+          <Link to="/">
+            <button
+              className="w-full text-left p-2 hover:bg-gray-700 rounded transition-colors flex items-center"
+              onClick={toggleMenu}
+              onMouseEnter={() => setHoveredItem("logout")}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              {hoveredItem === "logout" && <PiSignOutDuotone className="mr-2" />}
+              <span>Logout</span>
+            </button>
+          </Link>
+        </div>
       </div>
 
-      <div>
-        <select
-          value={selectedQuestion}
-          onChange={(e) => setSelectedQuestion(e.target.value)}
-          disabled={loading}
-        >
-          <option value="">Select a predefined question</option>
-          {predefinedQuestions.map((question, index) => (
-            <option key={index} value={question}>
-              {question}
-            </option>
-          ))}
-        </select>
+      <div className="flex-1 p-8">
+        <h1 className="text-2xl font-bold mb-6">AI-Enhanced Web Scraping</h1>
 
-        <textarea
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter your query"
-          disabled={selectedQuestion !== ""}
-        />
-        <button onClick={handleQuery} disabled={loading}>
-          Submit Query
-        </button>
+        {showScraper && (
+          <div className="mb-6">
+            <textarea
+              className="w-full p-3 border rounded-lg mb-3"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Enter URL to scrape"
+              rows={3}
+            />
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              onClick={handleSendMessage} 
+              disabled={loading}
+            >
+              Start Scraping
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col space-y-4">
+          <select
+            className="p-2 border rounded"
+            value={selectedQuestion}
+            onChange={(e) => setSelectedQuestion(e.target.value)}
+            disabled={loading}
+          >
+            <option value="">Select a predefined question</option>
+            {predefinedQuestions.map((question, index) => (
+              <option key={index} value={question}>
+                {question}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex flex-col space-y-4">
+            <textarea
+              className="w-full p-3 border rounded-lg"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter your query"
+              disabled={selectedQuestion !== ""}
+              rows={4}
+            />
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              onClick={handleQuery} 
+              disabled={loading}
+            >
+              Submit Query
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          {loading && <p className="text-gray-600">Loading...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {response && (
+            <div 
+              className="p-4 bg-gray-50 rounded-lg"
+              dangerouslySetInnerHTML={{ __html: response }} 
+            />
+          )}
+        </div>
       </div>
-
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {response && <div dangerouslySetInnerHTML={{ __html: response }} />}
     </div>
   );
 };

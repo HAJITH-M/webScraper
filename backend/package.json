@@ -29,13 +29,13 @@
     "openai": "^4.73.1",
     "pdf-parse": "^1.1.1",
     "playwright": "^1.49.0",
-    "puppeteer": "^23.9.0"
+    "puppeteer": "^23.9.0",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "prisma": "^5.22.0"
   },
-
-"engines": {
-  "node": "18.x" 
-}
+  "engines": {
+    "node": "18.x"
+  }
 }
