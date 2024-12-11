@@ -1,45 +1,84 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { marked } from "marked"; // Import marked library for Markdown conversion
-import DOMPurify from "dompurify"; // Import DOMPurify for sanitizing the HTML
-
-import { backEndUrl } from "../utils/BackendUrl"; // Ensure this is returning the correct backend URL
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import { Link } from "react-router-dom";
+import { PiSignOutDuotone } from "react-icons/pi";
+import { backEndUrl } from "../utils/BackendUrl";
+import { motion } from "framer-motion";
+import { HiMenuAlt3 } from "react-icons/hi";
+import { AiOutlineClose } from "react-icons/ai";
+import { IoSendSharp } from "react-icons/io5";
 
 const FileExtractor = () => {
-  const [file, setFile] = useState(null); // Selected file
-  const [email, setEmail] = useState(""); // Email input state
-  const [loadingUpload, setLoadingUpload] = useState(false); // Loading state for file upload
-  const [loadingQuery, setLoadingQuery] = useState(false); // Loading state for querying
-  const [error, setError] = useState(null); // Error state
-  const [fileText, setFileText] = useState(""); // Extracted file text
-  const [query, setQuery] = useState(""); // Query input state
-  const [queryResponse, setQueryResponse] = useState(""); // Query result from backend
-  const [fileTitles, setFileTitles] = useState([]); // File titles from backend
-  const [selectedFile, setSelectedFile] = useState(null); // File selected for AI analysis
+  const [file, setFile] = useState(null);
+  const [email, setEmail] = useState("");
+  const [loadingUpload, setLoadingUpload] = useState(false);
+  const [loadingQuery, setLoadingQuery] = useState(false);
+  const [error, setError] = useState(null);
+  const [fileText, setFileText] = useState("");
+  const [query, setQuery] = useState("");
+  const [queryResponse, setQueryResponse] = useState("");
+  const [fileTitles, setFileTitles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showFileInput, setShowFileInput] = useState(false);
+  const sidebarRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  // On component mount, get the email from local storage and fetch file titles automatically
   useEffect(() => {
-    const userEmail = localStorage.getItem("userEmail"); // Assuming the email is stored as 'userEmail' in localStorage
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    const userEmail = localStorage.getItem("userEmail");
     if (userEmail) {
-      setEmail(userEmail); // Set email from localStorage if available
-      fetchFileTitles(userEmail); // Automatically fetch file titles once email is set
+      setEmail(userEmail);
+      fetchFileTitles(userEmail);
     }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  // Handle file input change
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    // Optional: file type validation (check for pdf and docx)
     if (selectedFile && (selectedFile.type === "application/pdf" || selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
       setFile(selectedFile);
-      setError(null); // Reset error on valid file
+      setError(null);
     } else {
       setError("Please upload a valid PDF or DOCX file.");
-      setFile(null); // Clear file if invalid
+      setFile(null);
     }
   };
 
-  // Handle file upload with email
+  const handleUploadClick = () => {
+    setShowFileInput(true);
+  };
+
   const handleFileUpload = async () => {
     if (!file || !email) {
       setError("Both file and email are required.");
@@ -50,47 +89,39 @@ const FileExtractor = () => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("email", email); // Include email with the request
+    formData.append("email", email);
 
     try {
-      const backendUrl = await backEndUrl(); // Wait for the backend URL
-
+      const backendUrl = await backEndUrl();
       const response = await axios.post(`${backendUrl}/api/fileupload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      // Pass the extracted text to the state
       setFileText(response.data.text);
-
-      // After file upload, fetch the list of files for the entered email
       fetchFileTitles(email);
     } catch (err) {
       console.error("File upload error:", err);
       setError(err.response ? err.response.data.error : "Error uploading file.");
     } finally {
       setLoadingUpload(false);
+      setShowFileInput(false);
     }
   };
 
-  // Fetch file titles associated with the email
+
   const fetchFileTitles = async (email) => {
     if (!email) return;
-
-    setLoadingUpload(true); // Can use same loading for fetching files
+    setLoadingUpload(true);
     setError(null);
 
     try {
-      const backendUrl = await backEndUrl(); // Wait for the backend URL
-
+      const backendUrl = await backEndUrl();
       const response = await axios.post(`${backendUrl}/api/files-by-email`, { email }, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
-      // Set the file titles to state
       setFileTitles(response.data.files || []);
     } catch (err) {
       console.error("Error fetching file titles:", err);
@@ -100,31 +131,23 @@ const FileExtractor = () => {
     }
   };
 
-  // Handle selecting a file from the list
   const handleFileSelect = async (title) => {
-    setSelectedFile(title); // Update the selected file
-
-    // Fetch the full content of the selected file for AI analysis
+    setSelectedFile(title);
     fetchFileContent(title);
   };
 
-  // Fetch the full content of the selected file by its title
   const fetchFileContent = async (title) => {
     if (!email || !title) return;
-
     setLoadingQuery(true);
     setError(null);
 
     try {
-      const backendUrl = await backEndUrl(); // Wait for the backend URL
-
+      const backendUrl = await backEndUrl();
       const response = await axios.post(`${backendUrl}/api/file-content`, { email, title }, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
-      // Set the full content for AI analysis (the full extracted content)
       setFileText(response.data.content || "No content found for this file.");
     } catch (err) {
       console.error("Error fetching file content:", err);
@@ -134,50 +157,38 @@ const FileExtractor = () => {
     }
   };
 
-  // Handle query submission to search for a word's meaning
   const handleQuerySubmit = async () => {
     if (!query || !selectedFile || !fileText) return;
-
     setLoadingQuery(true);
     setError(null);
 
-    // Check if the query is asking for the meaning of a word
     const wordSearchQuery = query.toLowerCase().match(/what is the meaning of (\w+)/);
 
     try {
+      const backendUrl = await backEndUrl();
       if (wordSearchQuery) {
-        const word = wordSearchQuery[1]; // Extract the word to search for
-
-        const backendUrl = await backEndUrl(); // Wait for the backend URL
-
-        // Send the word and the content to the backend to analyze its meaning
+        const word = wordSearchQuery[1];
         const response = await axios.post(`${backendUrl}/api/filequery`, {
           query: `What is the meaning of the word '${word}'?`,
           title: selectedFile,
-          content: fileText, // Send the full content of the selected file
-          word: word, // Send the word to be searched
+          content: fileText,
+          word: word,
         }, {
           headers: {
             "Content-Type": "application/json",
           },
         });
-
-        // Set the response from the backend (AI-generated response based on full content)
         setQueryResponse(response.data.response);
       } else {
-        // If the query is not about a word meaning, send the query directly
-        const backendUrl = await backEndUrl(); // Wait for the backend URL
-
         const response = await axios.post(`${backendUrl}/api/filequery`, {
           query,
           title: selectedFile,
-          content: fileText, // Send the full content of the selected file
+          content: fileText,
         }, {
           headers: {
             "Content-Type": "application/json",
           },
         });
-
         setQueryResponse(response.data.response);
       }
     } catch (err) {
@@ -188,84 +199,201 @@ const FileExtractor = () => {
     }
   };
 
-  // Function to sanitize and render the Markdown response securely
+
   const renderMarkdown = (markdownText) => {
-    const rawHtml = marked(markdownText); // Convert Markdown to HTML
-    return { __html: DOMPurify.sanitize(rawHtml) }; // Sanitize HTML and return as an object for dangerouslySetInnerHTML
+    const rawHtml = marked(markdownText);
+    return { __html: DOMPurify.sanitize(rawHtml) };
   };
 
   return (
-    <div>
-      <h1>Chatbot with Document Upload and Query</h1>
-
-      {/* Email Input Section */}
-      <div>
-        <input
-          type="email"
-          value={email}
-          readOnly // Make email input read-only
-          style={{ marginTop: "10px", padding: "10px", width: "100%" }}
-        />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </div>
-
-      {/* Display File Titles */}
-      {fileTitles.length > 0 && (
-        <div>
-          <h2>Uploaded Files</h2>
-          <ul>
-            {fileTitles.map((file, index) => (
-              <li key={index} onClick={() => handleFileSelect(file.title)} style={{ cursor: "pointer", color: "blue" }}>
-                {file.title}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* File Upload Section */}
-      <div>
-        <input
-          type="file"
-          onChange={handleFileChange}
-          accept=".pdf,.docx" // Optional: restrict file types to PDF and DOCX
-        />
-        <button onClick={handleFileUpload} disabled={loadingUpload || !file || !email}>
-          {loadingUpload ? "Uploading..." : "Upload"}
+    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
+      <div className="flex h-screen relative">
+        <button
+          className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-gray-900 text-white"
+          onClick={toggleSidebar}
+        >
+          {isSidebarOpen ? <AiOutlineClose size={24} /> : <HiMenuAlt3 size={24} />}
         </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </div>
 
-      {/* Display Extracted Text */}
-      <div>
-        <h2>Extracted Text</h2>
-        <div style={{ maxHeight: "300px", overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid #ddd", padding: "10px" }}>
-          {fileText || "No extracted text available."}
+        <motion.div
+          ref={sidebarRef}
+          initial={{ x: -100, opacity: 0 }}
+          animate={{
+            x: isSidebarOpen ? 0 : -100,
+            opacity: isSidebarOpen ? 1 : 0
+          }}
+          transition={{ duration: 0.5 }}
+          className={`fixed lg:relative w-64 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
+        >
+          <div className="mb-4 flex items-center">
+            <div className="w-10 h-10 p-1 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white flex items-center justify-center mr-3 flex-shrink-0">
+              {email ? email[0].toUpperCase() : '?'}
+            </div>
+            <div className="flex-1 overflow-hidden select-none">
+              <input
+                type="email"
+                value={email}
+                readOnly
+                className="w-full p-2 rounded-lg select-none bg-gray-700 text-gray-100 shadow-sm  truncate"
+              />
+            </div>
+          </div>          
+          {showFileInput && (
+            <div className="fixed z-10 top-0 left-0 w-full h-full flex bg-black bg-opacity-60" onClick={(e) => {
+              if (e.target === e.currentTarget) setShowFileInput(false)
+            }}>
+              <div className="extraOutline p-4 bg-white w-max bg-whtie m-auto rounded-lg relative">
+                <button 
+                  onClick={() => setShowFileInput(false)}
+                  className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                >
+                  <AiOutlineClose size={20} />
+                </button>
+                <div className="file_upload p-5 relative border-4 border-dotted border-gray-300 rounded-lg" style={{width: "450px"}}>
+                  <svg className="text-indigo-500 w-24 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <div className="input_field flex flex-col w-max mx-auto text-center">
+                    {!file ? (
+                      <label>
+                        <input className="text-sm cursor-pointer w-36 hidden" type="file" onChange={handleFileChange} accept=".pdf,.docx" />
+                        <div className="text bg-indigo-600 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-indigo-500">Select</div>
+                      </label>
+                    ) : (
+                      <div className="text-indigo-600 font-semibold truncate max-w-[300px]">{file.name}</div>
+                    )}
+                    {!file && <div className="title text-indigo-500 uppercase">or drop files here</div>}
+                  </div>
+                  {file && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+                      onClick={() => {
+                        handleFileUpload()
+                        setFile(null)
+                        setShowFileInput(false)
+                      }}
+                      disabled={loadingUpload}
+                    >
+                      {loadingUpload ? "Uploading..." : "Upload"}
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}          
+           <div className="mb-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              className="w-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-4 py-1.5 rounded-md hover:shadow-lg transition-all duration-300 text-sm"
+              onClick={handleUploadClick}
+              disabled={loadingUpload || !email}
+            >
+              Upload File
+            </motion.button>
+          </div>
+
+
+          <div className="mb-8 flex-1 overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
+              Files
+            </h2>
+            {fileTitles.length > 0 && (
+              <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
+                <div className="space-y-2 pr-2">
+                  {fileTitles.map((file, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.02 }}
+                      className="cursor-pointer text-white hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 p-2 rounded transition-colors"
+                      onClick={() => handleFileSelect(file.title)}
+                    >
+                      {file.title}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>            )}
+          </div>
+          <div className="mt-auto">
+            <Link to="/">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-indigo-600 to-purple-600"
+                onClick={toggleMenu}
+                onMouseEnter={() => setHoveredItem("logout")}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                {hoveredItem === "logout" && <PiSignOutDuotone className="mr-2" />}
+                <span>Logout</span>
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
+
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-auto p-6">
+            {error && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-4 bg-red-100 text-red-700 rounded-lg mb-4"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {fileText && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="mb-6 p-4 bg-white/95 rounded-lg shadow-lg border border-gray-200"
+              >
+                <h2 className="text-xl font-bold mb-2">Extracted Text</h2>
+                <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+                  {fileText}
+                </div>
+              </motion.div>
+            )}
+
+            {queryResponse && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="mb-6 p-4 bg-white/95 rounded-lg shadow-lg border border-gray-200"
+              >
+                <h2 className="text-xl font-bold mb-2">Response</h2>
+                <div dangerouslySetInnerHTML={renderMarkdown(queryResponse)} />
+              </motion.div>
+            )}
+          </div>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="border-t bg-white/95 p-4"
+          >
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                placeholder="Enter your query"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/90"
+              />
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                onClick={handleQuerySubmit}
+                disabled={loadingQuery || !query}
+              >
+                <IoSendSharp size={20} />
+              </motion.button>
+            </div>
+          </motion.div>
         </div>
       </div>
-
-      {/* Query Section */}
-      <div>
-        <h2>Ask a Question</h2>
-        <input
-          type="text"
-          placeholder="Enter your query"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <button onClick={handleQuerySubmit} disabled={loadingQuery || !query}>
-          {loadingQuery ? "Processing..." : "Ask"}
-        </button>
-      </div>
-
-      {/* Display Query Response */}
-      {queryResponse && (
-        <div>
-          <h2>Response</h2>
-          <div dangerouslySetInnerHTML={renderMarkdown(queryResponse)} />
-        </div>
-      )}
     </div>
   );
 };

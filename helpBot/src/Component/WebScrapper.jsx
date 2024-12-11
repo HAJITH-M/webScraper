@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -6,6 +6,9 @@ import { Link } from "react-router-dom";
 import { PiSignOutDuotone } from "react-icons/pi";
 import { backEndUrl } from "../utils/BackendUrl";
 import { motion } from "framer-motion";
+import { HiMenuAlt3 } from "react-icons/hi";
+import { AiOutlineClose } from "react-icons/ai";
+import { IoSendSharp } from "react-icons/io5";
 
 const WebScrapper = () => {
   const [message, setMessage] = useState("");
@@ -17,9 +20,40 @@ const WebScrapper = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showScraper, setShowScraper] = useState(false);
-  const [hasScraped, setHasScraped] = useState(false); // Track scrape status
+
+  const [hasScraped, setHasScraped] = useState(false);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const predefinedQuestions = [
     "What is the purpose of this website?",
@@ -27,7 +61,6 @@ const WebScrapper = () => {
     "What are the key features of the site?",
   ];
 
-  // Function to check if user has already scraped
   const checkScrapeStatus = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -35,19 +68,19 @@ const WebScrapper = () => {
         setError("You must be logged in to scrape data.");
         return;
       }
-
+  
       const backendUrls = await backEndUrl();
       const res = await axios.get(
         `${backendUrls}/api/check-scrape-status`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       setHasScraped(res.data.hasScraped); // Set the scrape status
     } catch (error) {
       setError("Error checking scrape status.");
     }
   };
-
+  
   // Function to handle the scraping process
   const handleSendMessage = async () => {
     if (!message) {
@@ -66,14 +99,14 @@ const WebScrapper = () => {
         setError("You must be logged in to scrape data.");
         return;
       }
-
+  
       const backendUrls = await backEndUrl();
       const res = await axios.post(
         `${backendUrls}/scrape`,
         { url: message },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       if (Array.isArray(res.data.scrapedContent)) {
         const formattedResponse = res.data.scrapedContent
           .map(
@@ -93,11 +126,11 @@ const WebScrapper = () => {
       setLoading(false);
     }
   };
-
+  
   // Function to handle querying process
   const handleQuery = async () => {
     const queryToSend = selectedQuestion || query;
-
+  
     if (!queryToSend) {
       setError("Please enter or select a valid query");
       return;
@@ -110,21 +143,21 @@ const WebScrapper = () => {
         setError("You must be logged in to query data.");
         return;
       }
-
+  
       const backendUrls = await backEndUrl();
       const res = await axios.post(
         `${backendUrls}/query`,
         { query: queryToSend },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       const htmlResponse = marked(res.data.response);
       const sanitizedResponse = DOMPurify.sanitize(htmlResponse);
-
+  
       let formattedResponse = `
         <strong>AI Analysis:</strong><br />${sanitizedResponse}<br /><br />
       `;
-
+  
       if (res.data.urls && res.data.urls.length > 0) {
         formattedResponse += `
           <br /><br /><strong>Scraped URLs (Sources):</strong><br />
@@ -137,7 +170,7 @@ const WebScrapper = () => {
             .join("")}
         `;
       }
-
+  
       setResponse(formattedResponse);
     } catch (error) {
       if (error.response) {
@@ -155,7 +188,7 @@ const WebScrapper = () => {
       setLoading(false);
     }
   };
-
+  
   // Function to delete previously scraped data
   const handleDeleteScrapedData = async () => {
     try {
@@ -164,12 +197,12 @@ const WebScrapper = () => {
         setError("You must be logged in to delete scraped data.");
         return;
       }
-
+  
       const backendUrls = await backEndUrl();
       await axios.delete(`${backendUrls}/api/delete-scraped-data`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       setHasScraped(false); // Reset scrape status to false
       setResponse(""); // Clear the response data
       setError(""); // Clear any previous error
@@ -178,32 +211,49 @@ const WebScrapper = () => {
       setError("Error while deleting scraped data. Please try again later.");
     }
   };
-
-  // Checking if user has scraped data on component mount
+  
   useEffect(() => {
     if (selectedQuestion) {
       setQuery("");
     }
-    checkScrapeStatus(); // Check the scrape status on component mount
+
+    checkScrapeStatus();
   }, [selectedQuestion]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-      <div className="flex h-screen">
+
+      <div className="flex h-screen relative">
+        {/* Mobile Menu Button */}
+        <button
+          className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-gray-900 text-white"
+          onClick={toggleSidebar}
+        >
+          {isSidebarOpen ? <AiOutlineClose size={24} /> : <HiMenuAlt3 size={24} />}
+        </button>
+
         {/* Sidebar */}
         <motion.div
+          ref={sidebarRef}
           initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          animate={{ 
+            x: isSidebarOpen ? 0 : -100,
+            opacity: isSidebarOpen ? 1 : 0
+          }}
           transition={{ duration: 0.5 }}
-          className="w-64 bg-white/95 shadow-xl border-r border-gray-200 backdrop-blur-md text-gray-800 p-4"
+          className={`fixed lg:relative w-64 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
         >
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-fuchsia-600">
+            <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
               Menu
             </h2>
             <motion.button
               whileHover={{ scale: 1.02 }}
-              className="w-full text-left p-2 hover:bg-gradient-to-r from-indigo-50 to-fuchsia-50 rounded transition-colors mb-2"
+              className={`w-full text-left p-2 rounded transition-colors mb-2 text-white ${
+                showScraper ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-fuchsia-600'
+              }`}
               onClick={() => {
                 setMessage("");
                 setShowScraper(!showScraper);
@@ -214,17 +264,20 @@ const WebScrapper = () => {
             {hasScraped && (
               <motion.button
                 whileHover={{ scale: 1.02 }}
-                className="w-full text-left p-2 hover:bg-gradient-to-r from-indigo-50 to-fuchsia-50 rounded transition-colors mb-2"
-                onClick={handleDeleteScrapedData} // Handle delete action
+                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors mb-2 text-white bg-gradient-to-r from-indigo-600 to-purple-600"
+                onClick={handleDeleteScrapedData}
               >
                 Delete Scraped Data
               </motion.button>
             )}
-            <p className="mt-2 text-sm text-gray-600">{hasScraped ? "1/1 Scrapes" : "0/1 Scrapes"}</p>
+
+            <p className="mt-2 text-sm text-cyan-300">{hasScraped ? "1/1 Scrapes" : "0/1 Scrapes"}</p>
+          </div>
+          <div className="mt-auto">
             <Link to="/">
               <motion.button
                 whileHover={{ scale: 1.02 }}
-                className="w-full text-left p-2 hover:bg-gradient-to-r from-indigo-50 to-fuchsia-50 rounded transition-colors flex items-center"
+                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-indigo-600 to-purple-600"
                 onClick={toggleMenu}
                 onMouseEnter={() => setHoveredItem("logout")}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -238,8 +291,6 @@ const WebScrapper = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-
           {/* Chat Container */}
           <div className="flex-1 overflow-auto p-6">
             {response && (
@@ -326,11 +377,11 @@ const WebScrapper = () => {
                 />
                 <motion.button
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+                  className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
                   onClick={handleQuery}
                   disabled={loading}
                 >
-                  Send
+                  <IoSendSharp size={20} />
                 </motion.button>
               </div>
             </div>
