@@ -147,10 +147,24 @@ app.post('/scrape', authenticate, async (req, res) => {
   }
 
   try {
+    // Step 1: Check if the user has already scraped data
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    // Step 2: If the user has scraped, disallow further scraping unless they complete their task
+    if (user.hasScraped) {
+      return res.status(403).json({
+        error: 'You have already scraped data. Please use the previously scraped data before initiating a new scrape.',
+      });
+    }
+
+    // Step 3: Start scraping
     const browser = await playwright.chromium.launch({ headless: true });
     const scrapedContent = await crawlAndScrape(startUrl, browser);
     await browser.close();
 
+    // Step 4: Save scraped content to the database
     for (const page of scrapedContent) {
       await prisma.scrapedData.create({
         data: {
@@ -162,6 +176,12 @@ app.post('/scrape', authenticate, async (req, res) => {
       });
     }
 
+    // Step 5: Update user to reflect that scraping has been done
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { hasScraped: true }, // Set hasScraped to true after scraping
+    });
+
     res.json({ scrapedContent });
   } catch (error) {
     console.error('Error during scraping:', error);
@@ -171,7 +191,7 @@ app.post('/scrape', authenticate, async (req, res) => {
 
 
 // Route to query scraped data and enhance response with AI (Google Vertex AI / Gemini)
-app.post('/query',authenticate, async (req, res) => {
+app.post('/query', authenticate, async (req, res) => {
   const { query } = req.body;
 
   if (!query) {
@@ -179,11 +199,24 @@ app.post('/query',authenticate, async (req, res) => {
   }
 
   try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    // Step 1: Ensure the user has scraped data before they can query
+    if (!user.hasScraped) {
+      return res.status(403).json({
+        error: 'You need to scrape data before querying. Please scrape a website first.',
+      });
+    }
+
     const normalizedQuery = query.toLowerCase();
-    console.log('Normalized query:', normalizedQuery);  // Log the normalized query
+    console.log('Normalized query:', normalizedQuery);
 
     // Get the scraped data that might be useful for the AI model
-    const scrapedData = await prisma.scrapedData.findMany(); // Get all scraped data
+    const scrapedData = await prisma.scrapedData.findMany({
+      where: { userId: req.userId },
+    });
 
     // If no scraped data, return a generic response
     if (scrapedData.length === 0) {
@@ -215,7 +248,7 @@ app.post('/query',authenticate, async (req, res) => {
     res.json({
       response: aiResult.response.text() || 'I couldn\'t generate a response.',
       content: scrapedData.map((data) => data.content),
-      urls: scrapedData.map((data) => data.url), // Add URLs to the response
+      urls: scrapedData.map((data) => data.url),
     });
   } catch (error) {
     console.error('Error during query processing:', error.message);
@@ -226,6 +259,66 @@ app.post('/query',authenticate, async (req, res) => {
   }
 });
 
+
+
+// API route to check scrape status
+app.get('/api/check-scrape-status', authenticate, async (req, res) => {
+  try {
+    // Fetch the user from the database based on the user ID from JWT
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Send the scrape status (true or false)
+    res.json({
+      hasScraped: user.hasScraped,
+    });
+  } catch (error) {
+    console.error('Error checking scrape status:', error);
+    res.status(500).json({ error: 'Failed to check scrape status. Please try again later.' });
+  }
+});
+
+
+
+// API route to delete scraped data
+app.delete('/api/delete-scraped-data', authenticate, async (req, res) => {
+  try {
+    // Fetch the user from the database based on the user ID from JWT
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Step 1: Delete all scraped data associated with the user
+    await prisma.scrapedData.deleteMany({
+      where: { userId: req.userId },
+    });
+
+    // Step 2: Update the user to reset the 'hasScraped' flag to false
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { hasScraped: false },
+    });
+
+    // Return success message
+    res.json({
+      message: 'Successfully deleted the scraped data and reset the scrape status.',
+    });
+  } catch (error) {
+    console.error('Error deleting scraped data:', error);
+    res.status(500).json({ error: 'Failed to delete scraped data. Please try again later.' });
+  }
+});
 
 
 // Start the server

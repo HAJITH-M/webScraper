@@ -13,10 +13,12 @@ model User {
   password         String
   username         String?
   createdAt        DateTime          @default(now())
+  hasScraped       Boolean?           @default(false)  // New field to track scraping status
   extractedContent ExtractedContent[] // Relation to ExtractedContent (uploaded files)
   scrapedData      ScrapedData[]     // Relation to ScrapedData (scraped data)
   chatHistories    ChatHistory[]     // New relation to store chatbot interactions
 }
+
 
 
 
