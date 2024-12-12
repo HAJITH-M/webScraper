@@ -6,7 +6,7 @@ const mammoth = require("mammoth");
 const pdfParse = require("pdf-parse");
 const { PrismaClient } = require("@prisma/client");
 const { GoogleGenerativeAI } = require('@google/generative-ai'); // Import the GoogleGenerativeAI client
-
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 const prisma = new PrismaClient();
 const app = express();
@@ -19,18 +19,28 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 // Setup file upload using multer
 const upload = multer({ dest: "uploads/" });
 
+// Middleware for authenticating JWT token
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Bearer token format
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+    req.userId = decoded.id; // Save user ID for future use
+    next();
+  });
+};
+
 // **File Upload and Text Extraction Endpoint**
-router.post("/fileupload", upload.single("file"), async (req, res) => {
-  const { email } = req.body;  // Get the email from the request body
+router.post("/fileupload", authenticate, upload.single("file"), async (req, res) => {
   const filePath = path.join(__dirname, "../", req.file.path); // Correct the path for file cleanup
   const fileExtension = path.extname(req.file.originalname).toLowerCase();
 
   try {
     console.log("File received:", req.file);  // Debug: Log received file information
-
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
 
     let extractedText = "";
     const title = req.file.originalname; // Title is the original file name
@@ -44,11 +54,11 @@ router.post("/fileupload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Unsupported file type" });
     }
 
-    // Find or create the User based on the email
+    // Find or create the User based on the userId (from JWT)
     const user = await prisma.user.upsert({
-      where: { email: email },
+      where: { id: req.userId },
       update: {}, // No update necessary since we're just associating this user
-      create: { email: email, password: "default_password" }, // Use a default password (or ensure user creation logic is valid)
+      create: { email: "default_email@example.com", password: "default_password" }, // Ensure user creation logic is valid if needed
     });
 
     // Create a new entry in ExtractedContent with the associated userId
@@ -81,7 +91,7 @@ async function extractTextFromDocx(filePath) {
     const buffer = fs.readFileSync(filePath);
     const { value } = await mammoth.extractRawText({ buffer });
     return value;
-  } catch (error) {
+  } catch (error) { 
     console.error("Error extracting text from DOCX:", error);
     throw new Error("Failed to extract text from DOCX");
   }
@@ -100,8 +110,8 @@ async function extractTextFromPdf(filePath) {
 }
 
 // **Query Processing Endpoint**
-router.post("/filequery", async (req, res) => {
-  const { query, title } = req.body; // Include 'title' in the request body
+router.post("/filequery", authenticate, async (req, res) => {
+  const { query, title } = req.body;
 
   if (!query || !title) {
     return res.status(400).json({ error: "Query and file title are required" });
@@ -109,26 +119,25 @@ router.post("/filequery", async (req, res) => {
 
   try {
     const normalizedQuery = query.toLowerCase();
-    console.log("Normalized query:", normalizedQuery); // Log the normalized query for debugging
+    console.log("Normalized query:", normalizedQuery);  // Log the normalized query for debugging
 
-    // Fetch the extracted content from the database based on the title
+    // Fetch the extracted content from the database based on the title and userId (from JWT)
     const extractedContent = await prisma.extractedContent.findMany({
       where: {
         title: title, // Match the selected file's title
+        userId: req.userId, // Match the userId from JWT
       },
       include: {
         user: true, // Include user information for email retrieval
       },
     });
 
-    // If no content for the selected title, return a generic response
     if (extractedContent.length === 0) {
       return res.json({ response: `Sorry, no content found for the file titled "${title}".` });
     }
 
     // Construct the prompt for AI model based on the extracted content from the selected file
-    const prompt = `
-    The user has asked: "${query}". 
+    const prompt = `The user has asked: "${query}". 
     We have the following content from the uploaded file titled "${title}": 
 
     ${extractedContent.map((data) => {
@@ -137,25 +146,26 @@ router.post("/filequery", async (req, res) => {
       File Name: ${data.fileName}
       Title: ${data.title}
       Email: ${data.user ? data.user.email : "Unknown Email"} 
-      `;
+      ;`
     }).join("\n\n")}
 
     Please analyze the query and provide a helpful and accurate response based on the content of this file.
-    If the query is a greeting, respond with an appropriate friendly greeting that invites the user to ask more specific questions or explore the file.
-    If the query doesn't relate to the content, encourage them to ask a more specific question or provide more context.
-    If the query is related to the content, provide an answer based on the file's information.
-    `;
+    If the query is a greeting, I will respond with a friendly greeting and explain that I can help analyze the content of the file titled "${title}".
+    If the query is about the file content, I will provide a clear and detailed explanation based on the information available.
+    If the query is not directly related to the content, I will explain what information is available in the file and suggest more specific questions.
+    I will ensure my explanations are clear, accurate and helpful regardless of the type of query.
+    Let me know if you would like me to focus on any particular aspect of the file content.`;
 
     // Send the prompt to the AI model for analysis and response
-    const aiResult = await model.generateContent(prompt);
+    const aiResult = await model.generateContent(prompt); 
 
     // Return the AI-generated response along with the content and file names
     res.json({
       response: aiResult.response.text() || "I couldn't generate a response.",
       content: extractedContent.map((data) => data.content),
-      fileNames: extractedContent.map((data) => data.fileName), // Include file names in the response
-      titles: extractedContent.map((data) => data.title),  // Include titles in the response
-      emails: extractedContent.map((data) => data.user ? data.user.email : "Unknown Email") // Include emails in the response
+      fileNames: extractedContent.map((data) => data.fileName),
+      titles: extractedContent.map((data) => data.title),
+      emails: extractedContent.map((data) => data.user ? data.user.email : "Unknown Email"), // Include emails in the response
     });
   } catch (error) {
     console.error("Error during query processing:", error.message);
@@ -166,27 +176,13 @@ router.post("/filequery", async (req, res) => {
   }
 });
 
-// Endpoint to get file titles by email
-router.post("/files-by-email", async (req, res) => {
-  const { email } = req.body;  // Get the email from the request body
-  
+
+// Endpoint to get file titles for the authenticated user
+router.post("/files-by-user", authenticate, async (req, res) => {
   try {
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
-
-    // Find the user by email
-    const user = await prisma.user.findUnique({
-      where: { email: email },  // Find user by email
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Query the database for files associated with the user
+    // Query the database for files associated with the authenticated user (using JWT userId)
     const files = await prisma.extractedContent.findMany({
-      where: { userId: user.id },  // Fetch files based on userId
+      where: { userId: req.userId },  // Fetch files based on userId from JWT token
       select: { title: true, fileName: true, createdAt: true },
     });
 
@@ -198,29 +194,20 @@ router.post("/files-by-email", async (req, res) => {
   }
 });
 
-// Endpoint to get extracted content by file title and email
-router.post("/file-content", async (req, res) => {
-  const { email, title } = req.body;
+// Endpoint to get extracted content by file title and userId
+router.post("/file-content", authenticate, async (req, res) => {
+  const { title } = req.body;
 
   try {
-    if (!email || !title) {
-      return res.status(400).json({ error: "Email and title are required" });
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
     }
 
-    // Fetch the user by email to get their userId
-    const user = await prisma.user.findUnique({
-      where: { email: email }, // Find the user by email
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Fetch the file content by title and userId (from the User model)
+    // Fetch the file content by title and userId (from JWT)
     const fileContent = await prisma.extractedContent.findFirst({
       where: {
-        userId: user.id,  // Filter by userId (based on the email)
-        title: title,      // Filter by file title
+        userId: req.userId,  // Use userId from JWT
+        title: title,        // Filter by file title
       },
       select: {
         content: true,  // Only select the content of the file
@@ -237,10 +224,6 @@ router.post("/file-content", async (req, res) => {
     console.error("Error fetching file content:", error);
     res.status(500).json({ error: "Error fetching file content" });
   }
-}); 
-
-
-
+});
 
 module.exports = router;
- 

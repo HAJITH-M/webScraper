@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoSendSharp } from "react-icons/io5";
+import * as jwt_decode from 'jwt-decode'; // Changed import syntax
 
 const FileExtractor = () => {
   const [file, setFile] = useState(null);
@@ -48,10 +49,18 @@ const FileExtractor = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
 
-    const userEmail = localStorage.getItem("userEmail");
-    if (userEmail) {
-      setEmail(userEmail);
-      fetchFileTitles(userEmail);
+    // Extract email from JWT token
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwt_decode.jwtDecode(token); // Use jwtDecode method
+        const userEmail = decodedToken.email; // Assumes email is in the token payload
+        setEmail(userEmail);
+        fetchFileTitles(userEmail);
+      } catch (err) {
+        console.error("Error decoding token:", err);
+        setError("Invalid authentication token");
+      }
     }
 
     return () => {
@@ -59,11 +68,9 @@ const FileExtractor = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && (selectedFile.type === "application/pdf" || selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
@@ -92,12 +99,20 @@ const FileExtractor = () => {
     formData.append("email", email);
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("User not logged in.");
+        return;
+      }
+
       const backendUrl = await backEndUrl();
       const response = await axios.post(`${backendUrl}/api/fileupload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`,
         },
       });
+
       setFileText(response.data.text);
       fetchFileTitles(email);
     } catch (err) {
@@ -109,17 +124,23 @@ const FileExtractor = () => {
     }
   };
 
-
   const fetchFileTitles = async (email) => {
     if (!email) return;
     setLoadingUpload(true);
     setError(null);
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("User not logged in.");
+        return;
+      }
+
       const backendUrl = await backEndUrl();
-      const response = await axios.post(`${backendUrl}/api/files-by-email`, { email }, {
+      const response = await axios.post(`${backendUrl}/api/files-by-user`, { email }, {
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
       });
       setFileTitles(response.data.files || []);
@@ -142,10 +163,17 @@ const FileExtractor = () => {
     setError(null);
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("User is not authenticated.");
+        return;
+      }
+
       const backendUrl = await backEndUrl();
       const response = await axios.post(`${backendUrl}/api/file-content`, { email, title }, {
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
       });
       setFileText(response.data.content || "No content found for this file.");
@@ -165,6 +193,12 @@ const FileExtractor = () => {
     const wordSearchQuery = query.toLowerCase().match(/what is the meaning of (\w+)/);
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("User is not authenticated.");
+        return;
+      }
+
       const backendUrl = await backEndUrl();
       if (wordSearchQuery) {
         const word = wordSearchQuery[1];
@@ -176,6 +210,7 @@ const FileExtractor = () => {
         }, {
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
         });
         setQueryResponse(response.data.response);
@@ -187,6 +222,7 @@ const FileExtractor = () => {
         }, {
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
         });
         setQueryResponse(response.data.response);
@@ -198,7 +234,6 @@ const FileExtractor = () => {
       setLoadingQuery(false);
     }
   };
-
 
   const renderMarkdown = (markdownText) => {
     const rawHtml = marked(markdownText);
@@ -307,7 +342,11 @@ const FileExtractor = () => {
                     <motion.div
                       key={index}
                       whileHover={{ scale: 1.02 }}
-                      className="cursor-pointer text-white hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 p-2 rounded transition-colors"
+                      className={`cursor-pointer text-white p-2 rounded transition-colors ${
+                        selectedFile === file.title 
+                          ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' 
+                          : 'hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600'
+                      }`}
                       onClick={() => handleFileSelect(file.title)}
                     >
                       {file.title}
@@ -332,7 +371,7 @@ const FileExtractor = () => {
           </div>
         </motion.div>
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto p-6">
             {error && (
               <motion.div
@@ -351,7 +390,8 @@ const FileExtractor = () => {
                 className="mb-6 p-4 bg-white/95 rounded-lg shadow-lg border border-gray-200"
               >
                 <h2 className="text-xl font-bold mb-2">Extracted Text</h2>
-                <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+
+                <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-transparent">
                   {fileText}
                 </div>
               </motion.div>
@@ -394,8 +434,8 @@ const FileExtractor = () => {
           </motion.div>
         </div>
       </div>
-    </div>
-  );
+
+    </div>  );
 };
 
 export default FileExtractor;

@@ -35,9 +35,11 @@ const authenticate = (req, res, next) => {
       return res.status(500).json({ error: 'Failed to authenticate token' });
     }
     req.userId = decoded.id; // Save user ID for future use
+    req.email = decoded.email; // Extract email from token
     next();
   });
 };
+
 
 // Default route
 app.get('/', async (req, res) => {
