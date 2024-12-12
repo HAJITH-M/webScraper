@@ -2,6 +2,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { GoogleGenerativeAI } = require('@google/generative-ai'); // Import the GoogleGenerativeAI client
 const { v4: uuidv4 } = require("uuid");  // Import UUID for session IDs
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -12,8 +13,23 @@ app.use(express.json());  // Ensure to parse JSON bodies
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Use your GEMINI API key from .env
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Bearer token format
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+    req.userId = decoded.id; // Save user ID for future use
+    next();
+  });
+};
+
+
 // **Chatbot Route to answer user queries**
-router.post("/chatbot", async (req, res) => {
+router.post("/chatbot", authenticate, async (req, res) => {
   const { query, email, sessionId } = req.body;
 
   if (!query || !email) {
@@ -164,7 +180,7 @@ Please let me know what you need help with!";
 
 
 // **Fetch the list of previous sessions for the user**
-router.get("/getSessions", async (req, res) => {
+router.get("/getSessions", authenticate, async (req, res) => {
     const { email } = req.query;
 
     if (!email) {
@@ -203,7 +219,7 @@ router.get("/getSessions", async (req, res) => {
 
 // **Fetch all messages for a specific session**
 // **Fetch all messages for a specific session**
-router.get("/getSessionMessages", async (req, res) => {
+router.get("/getSessionMessages", authenticate, async (req, res) => {
   const { email, sessionId } = req.query;
 
   if (!email || !sessionId) {
