@@ -1,22 +1,23 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+export const logoutUser = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("userEmail");
+  toast.success("Logout successful");
+  window.location.href = "/";
+};
+
+export const clearLocalStorage = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("userEmail");
+  window.location.href = "/";
+};
+
 const LogOut = () => {
-  const navigate = useNavigate();
-
   useEffect(() => {
-    const logoutUser = () => {
-      localStorage.clear();
-      toast.success("Logout successful");
-      navigate("/login");
-      window.location.reload();    
-    };
-
     logoutUser();
-  }, [navigate]);
-
-  
+  }, []);
 
   return null;
 };

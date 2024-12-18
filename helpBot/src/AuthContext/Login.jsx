@@ -2,7 +2,6 @@
   import axios from "axios";
   import toast from "react-hot-toast";
   import { Link, useNavigate } from "react-router-dom";
-
   import { Canvas } from "@react-three/fiber";
   import { OrbitControls, Stars } from "@react-three/drei";
   import { motion } from "framer-motion";
@@ -23,6 +22,8 @@
       email: "",
       password: "",
     });
+
+    
 
     useEffect(() => {
       const token = localStorage.getItem('token');

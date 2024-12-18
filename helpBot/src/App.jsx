@@ -10,6 +10,7 @@ import LogOut from './AuthContext/LogOut';
 import ImageComponent from './Component/ImageComponent/ImageComponent';
 import ChatBot from './Component/ChatBot/ChatBot';
 import HomeComponent from './Component/HomeComponent/HomeComponent';
+import CircleMenuComponent from './Component/CircleMenuComponent/CircleMenuComponent';
 
 const App = () => {
   return (
@@ -18,7 +19,7 @@ const App = () => {
       <Routes>
         <Route path="/WebScrapper" element={<PrivateRoute><WebScrapper /></PrivateRoute>} />
         <Route path="/fileupload" element={<PrivateRoute><FileExtractor /></PrivateRoute>} />  
-        <Route path="/image" element={<PrivateRoute><ImageComponent /></PrivateRoute>} />  
+        <Route path="/imagegeneration" element={<PrivateRoute><ImageComponent /></PrivateRoute>} />  
         <Route path="/chatbot" element={<PrivateRoute><ChatBot /></PrivateRoute>} />  
 
         <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/" element={<HomeComponent />} />
 
       </Routes>
+      <CircleMenuComponent/>
     </Router>
     </>
     

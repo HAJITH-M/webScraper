@@ -24,6 +24,8 @@ const WebScrapper = () => {
   const [hasScraped, setHasScraped] = useState(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showNoDataModal, setShowNoDataModal] = useState(false);
+
   const sidebarRef = useRef(null);
 
   useEffect(() => {
@@ -130,6 +132,11 @@ const WebScrapper = () => {
   // Function to handle querying process
   const handleQuery = async () => {
     const queryToSend = selectedQuestion || query;
+
+    if (!hasScraped) {
+      setShowNoDataModal(true);
+      return;
+    }
   
     if (!queryToSend) {
       setError("Please enter or select a valid query");
@@ -221,7 +228,36 @@ const WebScrapper = () => {
   }, [selectedQuestion]);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
+
+
+
+    <div className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black">
+
+{showNoDataModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-gradient-to-r from-gray-900 to-black p-6 rounded-lg border border-cyan-500 max-w-md">
+      <h3 className="text-xl font-bold mb-4 text-cyan-400">No Data Available</h3>
+      <p className="text-white mb-4">Please scrape a website first before making queries.</p>
+      <div className="flex justify-end space-x-4">
+        <button
+          onClick={() => {
+            setShowNoDataModal(false);
+            setShowScraper(true);
+          }}
+          className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded hover:from-cyan-400 hover:to-fuchsia-600"
+        >
+          Start Scraping
+        </button>
+        <button
+          onClick={() => setShowNoDataModal(false)}
+          className="border border-cyan-500 text-cyan-400 px-4 py-2 rounded hover:bg-cyan-500/10"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <div className="flex h-screen relative">
         {/* Mobile Menu Button */}
@@ -233,15 +269,10 @@ const WebScrapper = () => {
         </button>
 
         {/* Sidebar */}
-        <motion.div
+        <div
           ref={sidebarRef}
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ 
-            x: isSidebarOpen ? 0 : -100,
-            opacity: isSidebarOpen ? 1 : 0
-          }}
-          transition={{ duration: 0.5 }}
-          className={`fixed lg:relative w-64 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
+
+          className={`fixed lg:relative w-64 h-full border-r-2 border-indigo-800 bg-gradient-to-b from-black via-gray-900 to-black shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
@@ -249,10 +280,10 @@ const WebScrapper = () => {
             <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
               Menu
             </h2>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
+            <button
               className={`w-full text-left p-2 rounded transition-colors mb-2 text-white ${
-                showScraper ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-fuchsia-600'
+
+                showScraper ? 'bg-gradient-to-r from-cyan-500 to-purple-600' : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-fuchsia-600'
               }`}
               onClick={() => {
                 setMessage("");
@@ -260,132 +291,135 @@ const WebScrapper = () => {
               }}
             >
               Start Scraping
-            </motion.button>
+            </button>
             {hasScraped && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors mb-2 text-white bg-gradient-to-r from-indigo-600 to-purple-600"
+              <button
+
+                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-fuchsia-600 rounded transition-colors mb-2 text-white bg-gradient-to-r from-cyan-500 to-purple-600"
                 onClick={handleDeleteScrapedData}
               >
                 Delete Scraped Data
-              </motion.button>
+              </button>
             )}
 
-            <p className="mt-2 text-sm text-cyan-300">{hasScraped ? "1/1 Scrapes" : "0/1 Scrapes"}</p>
+
+            <p className="mt-2 text-sm text-cyan-400">{hasScraped ? "1/1 Scrapes" : "0/1 Scrapes"}</p>
           </div>
           <div className="mt-auto">
             <Link to="/">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-indigo-600 to-purple-600"
+              <button
+
+                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-cyan-500 to-purple-600"
                 onClick={toggleMenu}
                 onMouseEnter={() => setHoveredItem("logout")}
                 onMouseLeave={() => setHoveredItem(null)}
               >
                 {hoveredItem === "logout" && <PiSignOutDuotone className="mr-2" />}
                 <span>Logout</span>
-              </motion.button>
+              </button>
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Chat Container */}
           <div className="flex-1 overflow-auto p-6">
             {response && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="mb-6 p-4 bg-white/95 rounded-lg shadow-lg border border-gray-200 backdrop-blur-md"
+              <div
+
+                className="mb-6 p-4 bg-black/90 rounded-lg shadow-lg border border-cyan-500 backdrop-blur-md text-white"
               >
                 <div
-                  className="prose max-w-none"
+
+                  className="prose max-w-none prose-invert"
                   dangerouslySetInnerHTML={{ __html: response }}
                 />
-              </motion.div>
+              </div>
             )}
             {loading && (
               <div className="flex justify-center items-center p-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
               </div>
             )}
             {error && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 border border-red-200"
+              <div
+
+                className="p-4 bg-red-900/80 text-red-200 rounded-lg mb-4 border border-red-500"
               >
                 {error}
-              </motion.div>
+              </div>
             )}
           </div>
 
           {/* Input Area */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="border-t bg-white/95 p-4 backdrop-blur-md"
+          <div
+
+            className=" bg-black/90 p-4 backdrop-blur-md"
           >
             {showScraper && (
               <div className="mb-4">
                 <textarea
-                  className="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/90"
+
+                  className="w-full p-3 border border-cyan-500 rounded-lg mb-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent bg-black/90 text-white"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Enter URL to scrape"
                   rows={2}
                 />
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+                <button
+
+                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:from-cyan-400 hover:to-fuchsia-600"
                   onClick={handleSendMessage}
                   disabled={loading}
                 >
                   Start Scraping
-                </motion.button>
+                </button>
               </div>
             )}
 
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2 mb-4">
                 {predefinedQuestions.map((question, index) => (
-                  <motion.button
+                  <button
                     key={index}
-                    whileHover={{ scale: 1.02 }}
                     className={`px-4 py-2 rounded-lg transition-all duration-300 ${
                       selectedQuestion === question
-                        ? "bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white"
-                        : "bg-white border border-gray-300 text-gray-700 hover:border-indigo-500"
+
+
+                        ? "bg-gradient-to-r from-cyan-500 to-purple-600 text-white"
+                        : "bg-black/90 border border-cyan-500 text-cyan-400 hover:border-purple-500"
                     }`}
                     onClick={() => setSelectedQuestion(question === selectedQuestion ? "" : question)}
                     disabled={loading}
                   >
                     {question}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
               <div className="flex space-x-2">
                 <textarea
-                  className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/90"
+
+                  className="flex-1 p-3 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent bg-black/90 text-white"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Enter your query"
                   disabled={selectedQuestion !== ""}
                   rows={1}
                 />
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                <button
+
+                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:from-cyan-400 hover:to-fuchsia-600 flex items-center justify-center"
                   onClick={handleQuery}
                   disabled={loading}
                 >
                   <IoSendSharp size={20} />
-                </motion.button>
+                </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

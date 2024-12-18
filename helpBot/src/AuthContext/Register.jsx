@@ -31,9 +31,7 @@ const Register = () => {
     if (token) {
       router('/webscrapper');
     }
-    else {
-      router('/');
-    }
+   
   }, []);
 
   const handleChange = (e) => {

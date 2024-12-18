@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
         // If user exists and the password matches
         if (user && await bcrypt.compare(password, user.password)) {
             // Generate JWT token with id and email
-            const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
             res.json({ token });
         } else {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -66,7 +66,7 @@ router.post('/signup', async (req, res) => {
 
         // Generate JWT token for the new user with id and email
         const token = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, {
-            expiresIn: '24h',
+            expiresIn: '30d',
         });
 
         res.status(201).json({ msg: "User registered successfully", token });
@@ -75,6 +75,6 @@ router.post('/signup', async (req, res) => {
         res.status(500).json({ error: 'Failed to register user' });
     }
 });
-
+ 
 // Export the router to be used in the main app
 module.exports = router;
