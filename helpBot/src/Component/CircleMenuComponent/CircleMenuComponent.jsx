@@ -1,27 +1,72 @@
-  import React, { useState } from 'react';
+  import React, { useEffect, useState } from 'react';
   import { AiOutlineMenu, AiOutlineHome, AiOutlineCamera, AiOutlineFile, AiOutlineGlobal, AiOutlineRobot } from 'react-icons/ai';
+  import * as jwt_decode from 'jwt-decode'; // Changed import syntax
+import { useNavigate } from 'react-router-dom';
 
   const CircleMenuComponent = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isClicked, setIsClicked] = useState(false);
+
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+        const email = token ? jwt_decode.jwtDecode(token).email : null;
+    
+        useEffect(() => {
+            const validateToken = () => {
+              const token = localStorage.getItem('token');
+              if (!token) {
+                navigate('/login');
+                return false;
+              }
+              const decodedToken = jwt_decode.jwtDecode(token);
+              if (decodedToken.exp < Date.now() / 1000) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userEmail');
+                navigate('/login');
+                return false;
+              }
+              return true;
+            };
+        
+            validateToken();
+          }, [navigate]);
+    
 
     const menuItems = [
-      { icon: <AiOutlineHome />, label: 'HelpBot Hub', onClick: () => window.location.href = '/home' },
-      { icon: <AiOutlineCamera />, label: 'Image Wizard', onClick: () => window.location.href = '/image' },
-      { icon: <AiOutlineFile />, label: 'File Master', onClick: () => window.location.href = '/file-extractor' },
-      { icon: <AiOutlineGlobal />, label: 'Web Explorer', onClick: () => window.location.href = '/web-scrapper' },
+      { icon: <AiOutlineHome />, label: 'HelpBot Hub', onClick: () => window.location.href = '/' },
+      { icon: <AiOutlineCamera />, label: 'Image Wizard', onClick: () => window.location.href = '/imagegeneration' },
+      { icon: <AiOutlineFile />, label: 'File Master', onClick: () => window.location.href = '/fileupload' },
+      { icon: <AiOutlineGlobal />, label: 'Web Explorer', onClick: () => window.location.href = '/WebScrapper' },
       { icon: <AiOutlineRobot />, label: 'Chat Assistant', onClick: () => window.location.href = '/chatbot' }
     ];
+
+    const handleMouseEnter = () => {
+      if (!isClicked) {
+        setIsOpen(true);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!isClicked) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleClick = () => {
+      setIsClicked(!isClicked);
+      setIsOpen(!isOpen);
+    };
 
     return (
       <div className="fixed top-1/2 right-0 transform -translate-y-1/2">
         <div 
           className="relative"
-          onMouseEnter={() => setIsOpen(true)}
-          onMouseLeave={() => setIsOpen(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <button 
             className="w-3 h-40 bg-gradient-to-b from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 rounded-l-lg transition-all duration-500 shadow-lg"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={handleClick}
           >
             <div className="h-full w-full flex items-center justify-center">
               <div className="w-1 h-20 bg-white/30 rounded-full"></div>
@@ -46,11 +91,9 @@
                 </button>
               ))}
             </div>
-
           </div>
         </div>
       </div>
     );
   };
-
   export default CircleMenuComponent;

@@ -30,7 +30,7 @@
                 <div className="space-y-6 sm:space-y-8 animate-pulse">
                   <div className="h-8 bg-gray-700 rounded w-3/4"></div>
                   <div className="space-y-3">
-                    {[1, 2, 3, 4].map((_, index) => (
+                    {[1, 2, 3, 4].map((item, index) => (
                       <div key={index} className="h-4 bg-gray-700 rounded w-1/2"></div>
                     ))}
                   </div>
@@ -43,7 +43,7 @@
               </div>
 
               <div className="mt-16 sm:mt-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 px-4 animate-pulse">
-                {[1, 2, 3, 4].map((_, index) => (
+                {[1, 2, 3, 4].map((item, index) => (
                   <div key={index} className="h-48 bg-gray-700 rounded-xl"></div>
                 ))}
               </div>
@@ -95,7 +95,16 @@
                   Get Started
                   <span className="ml-2 inline-block group-hover:translate-x-1 transition-transform">→</span>
                 </button>
-              </div>
+
+                <a href="#features" className="flex items-center space-x-2 justify-center mt-8 transition-colors group">
+
+
+                  <span className="text-sm font-semibold text-white hover:text-blue-400 transition-colors duration-300 animate-neon bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">View More</span>
+                  <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform animate-bounce text-white hover:text-blue-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                  </svg>
+
+                </a>                              </div>
 
               <div className="relative mt-8 md:mt-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 blur-3xl opacity-20"></div>
@@ -121,7 +130,18 @@
               </div>
             </div>
 
-            <div className="mt-16 sm:mt-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 px-4">
+            
+
+            <div className="text-center mt-16 sm:mt-24 px-4">
+              <h2 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4 sm:mb-6">
+                Our Powerful Features
+              </h2>
+              <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto">
+                Discover our comprehensive suite of AI-powered tools designed to transform your business operations
+              </p>
+            </div>
+
+            <div id='features' className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 px-4" >
               {[
                 
                 {
@@ -149,9 +169,8 @@
                   path: "/fileupload"
                 }
               ].map((item, index) => (
-                <Link to={item.path}>
+                <Link key={index} to={item.path}>
                   <div 
-                  key={index} 
                   className="group p-4 sm:p-6 bg-black/50 backdrop-blur-sm border border-gray-800 rounded-xl hover:border-purple-500 transition-all"
                 >
                   <span className="text-2xl sm:text-3xl block mb-3 sm:mb-4">{item.icon}</span>
@@ -163,7 +182,6 @@
                 </Link>
               ))}
             </div>
-
             <div className="text-center mt-16 sm:mt-24 px-4">
               <h2 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4 sm:mb-6">
                 Elevate Your Business with AI
