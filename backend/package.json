@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "build": "prisma generate"
+    "build": "prisma generate",
+    "postinstall": "npx playwright install"
   },
   "keywords": [],
   "author": "",
@@ -29,11 +30,11 @@
     "openai": "^4.73.1",
     "pdf-parse": "^1.1.1",
     "playwright": "^1.49.0",
+    "playwright-core": "^1.49.1",
     "puppeteer": "^23.9.0",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
     "prisma": "^5.22.0"
   }
-  
 }

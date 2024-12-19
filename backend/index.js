@@ -1,5 +1,6 @@
 const express = require('express');
-const playwright = require('playwright');
+
+const playwright = require('playwright-core');
 const url = require('url');
 const cors = require('cors');
 const cheerio = require('cheerio');
