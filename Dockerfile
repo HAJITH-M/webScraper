@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y \
   libx11-dev \
   python3 \
   python3-pip \
+  python3-dev \
+  build-essential \
+  libpq-dev \
   && apt-get clean
 
 # Set the working directory for the application
@@ -36,6 +39,11 @@ COPY backend ./backend/
 
 # Install Python dependencies
 COPY BackEndImage/requirements.txt ./BackEndImage/
+
+# Add debugging for Python package installation
+RUN echo "Checking Python and pip versions:" && python3 --version && pip3 --version
+RUN echo "Listing contents of BackEndImage folder:" && ls -la BackEndImage/
+RUN pip3 install --upgrade pip  # Optional: Update pip to the latest version
 RUN pip3 install -r BackEndImage/requirements.txt
 
 # Copy the Python backend code
