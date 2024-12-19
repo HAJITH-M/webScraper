@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy the Node.js application files and install Node.js dependencies
-COPY backend/package.json node-app/package-lock.json ./backend/
+COPY backend/package.json backend/package-lock.json ./backend/
 RUN cd backend && npm install
 
 # Install Playwright and its dependencies for the Node.js app
@@ -34,13 +34,9 @@ RUN npx playwright install --with-deps
 # Copy the Node.js application code
 COPY backend ./backend/
 
-
-
-
-
 # Install Python dependencies
 COPY BackEndImage/requirements.txt ./BackEndImage/
-RUN pip3 install -r python-backend/requirements.txt
+RUN pip3 install -r BackEndImage/requirements.txt
 
 # Copy the Python backend code
 COPY BackEndImage ./BackEndImage/
