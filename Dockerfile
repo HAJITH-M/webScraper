@@ -4,7 +4,7 @@ FROM node:18-slim
 # Set environment to non-interactive to avoid unnecessary prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required system dependencies for Playwright and Python
+# Install required system dependencies for Playwright and Python, including python3-venv
 RUN apt-get update && apt-get install -y \
   wget \
   libnss3 \
@@ -25,7 +25,8 @@ RUN apt-get update && apt-get install -y \
   python3-dev \
   build-essential \
   libpq-dev \
-  xz-utils && apt-get clean
+  xz-utils \
+  python3-venv && apt-get clean
 
 # Remove unnecessary man page creation and symbolic link issues
 RUN apt-get remove -y xz-utils && apt-get autoremove -y && apt-get clean
