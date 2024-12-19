@@ -25,25 +25,25 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy the Node.js application files and install Node.js dependencies
-COPY node-app/package.json node-app/package-lock.json ./backend/
-RUN cd node-app && npm install
+COPY backend/package.json node-app/package-lock.json ./backend/
+RUN cd backend && npm install
 
 # Install Playwright and its dependencies for the Node.js app
 RUN npx playwright install --with-deps
 
 # Copy the Node.js application code
-COPY node-app ./node-app/
+COPY backend ./backend/
 
 
 
 
 
 # Install Python dependencies
-COPY python-backend/requirements.txt ./BackEndImage/
+COPY BackEndImage/requirements.txt ./BackEndImage/
 RUN pip3 install -r python-backend/requirements.txt
 
 # Copy the Python backend code
-COPY python-backend ./python-backend/
+COPY BackEndImage ./BackEndImage/
 
 # Run Prisma generate for the Node.js app
 RUN cd node-app && npx prisma generate
@@ -52,4 +52,4 @@ RUN cd node-app && npx prisma generate
 EXPOSE 5000
 
 # Run both Node.js and Python applications together
-CMD ["sh", "-c", "cd node-app && npm start & python3 python-backend/your_python_script.py"]
+CMD ["sh", "-c", "cd backend && npm start & python3 BackEndImage/app.py"]
