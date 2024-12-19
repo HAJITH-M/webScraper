@@ -32,6 +32,10 @@ RUN npx playwright install --with-deps
 # Copy the rest of the app's code
 COPY . .
 
+# Run Prisma generate to generate the Prisma client
+RUN npx prisma generate
+
+
 # Expose the necessary port
 EXPOSE 5000
 
