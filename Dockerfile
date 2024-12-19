@@ -46,7 +46,7 @@ RUN pip3 install -r python-backend/requirements.txt
 COPY BackEndImage ./BackEndImage/
 
 # Run Prisma generate for the Node.js app
-RUN cd node-app && npx prisma generate
+RUN cd backend && npx prisma generate
 
 # Expose the necessary port
 EXPOSE 5000
