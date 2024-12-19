@@ -1,6 +1,9 @@
 # Use an official Node.js image
 FROM node:18-slim
 
+# Set environment to non-interactive to avoid unnecessary prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install required system dependencies for Playwright and Python
 RUN apt-get update && apt-get install -y \
   wget \
@@ -22,7 +25,11 @@ RUN apt-get update && apt-get install -y \
   python3-dev \
   build-essential \
   libpq-dev \
+  xz-utils \  # xz-utils (lzma, xz) for compression tools
   && apt-get clean
+
+# Remove unnecessary man page creation and symbolic link issues
+RUN apt-get remove -y xz-utils && apt-get autoremove -y && apt-get clean
 
 # Set the working directory for the application
 WORKDIR /app
@@ -40,10 +47,16 @@ COPY backend ./backend/
 # Install Python dependencies
 COPY BackEndImage/requirements.txt ./BackEndImage/
 
-# Add debugging for Python package installation
+# Debugging: Check Python and pip versions
 RUN echo "Checking Python and pip versions:" && python3 --version && pip3 --version
-RUN echo "Listing contents of BackEndImage folder:" && ls -la BackEndImage/
-RUN pip3 install --upgrade pip  # Optional: Update pip to the latest version
+
+# Upgrade pip in a more resilient way
+RUN python3 -m pip install --upgrade pip
+
+# Check if pip is upgraded successfully
+RUN echo "Pip upgraded, checking version again:" && pip3 --version
+
+# Install Python dependencies
 RUN pip3 install -r BackEndImage/requirements.txt
 
 # Copy the Python backend code
