@@ -38,7 +38,7 @@ COPY backend/package.json backend/package-lock.json ./backend/
 RUN cd backend && npm install
 
 # Install Playwright and its dependencies for the Node.js app
-RUN npx playwright install --with-deps
+RUN cd backend && npx playwright install --with-deps
 
 # Copy the Node.js application code
 COPY backend ./backend/
@@ -46,17 +46,12 @@ COPY backend ./backend/
 # Install Python dependencies
 COPY BackEndImage/requirements.txt ./BackEndImage/
 
-# Debugging: Check Python and pip versions
-RUN echo "Checking Python and pip versions:" && python3 --version && pip3 --version
+# Create a virtual environment for Python and upgrade pip
+RUN python3 -m venv /venv
+RUN /venv/bin/pip install --upgrade pip
 
-# Upgrade pip in a more resilient way
-RUN python3 -m pip install --upgrade pip
-
-# Check if pip is upgraded successfully
-RUN echo "Pip upgraded, checking version again:" && pip3 --version
-
-# Install Python dependencies
-RUN pip3 install -r BackEndImage/requirements.txt
+# Install Python dependencies within the virtual environment
+RUN /venv/bin/pip install -r BackEndImage/requirements.txt
 
 # Copy the Python backend code
 COPY BackEndImage ./BackEndImage/
@@ -68,4 +63,4 @@ RUN cd backend && npx prisma generate
 EXPOSE 5000
 
 # Run both Node.js and Python applications together
-CMD ["sh", "-c", "cd backend && npm start & python3 BackEndImage/app.py"]
+CMD ["sh", "-c", "cd backend && npm start & /venv/bin/python3 BackEndImage/app.py"]
