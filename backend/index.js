@@ -113,7 +113,7 @@ const scrapePage = async (pageUrl, browser) => {
 const crawlAndScrape = async (startUrl, browser) => {
   const visited = new Set(); // To avoid revisiting the same page
   const toVisit = [startUrl]; // Pages to visit
-  let scrapedContent = [];
+  var scrapedContent = [];
 
   while (toVisit.length > 0) {
     const currentUrl = toVisit.pop();
@@ -163,8 +163,10 @@ app.post('/scrape', authenticate, async (req, res) => {
     }
 
     // Step 3: Start scraping
-    const browser = await playwright.chromium.launch({ headless: true });
-    const scrapedContent = await crawlAndScrape(startUrl, browser);
+const browser = await playwright.chromium.launch({
+  headless: true, // Ensure headless mode is enabled
+});   
+ const scrapedContent = await crawlAndScrape(startUrl, browser);
     await browser.close();
 
     // Step 4: Save scraped content to the database

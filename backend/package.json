@@ -6,8 +6,9 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "build": "prisma generate",
-    "postinstall": "npx playwright install"
+    "postinstall": "npx playwright install --with-deps"
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
