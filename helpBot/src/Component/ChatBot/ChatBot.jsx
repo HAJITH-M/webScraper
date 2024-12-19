@@ -23,6 +23,9 @@ const ChatBot = () => {
     const [sessions, setSessions] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [hoveredItem, setHoveredItem] = useState(null);
+    const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
+
 
     const sidebarRef = useRef(null);
     const token = localStorage.getItem('token');
@@ -109,6 +112,9 @@ const ChatBot = () => {
             setSessions(data.sessions);
         } catch (error) {
             console.error('Error fetching previous sessions:', error);
+        }
+        finally{
+            setIsLoadingSessions(false);
         }
     };
 
@@ -284,6 +290,8 @@ const ChatBot = () => {
 
     return (
         <div className="flex h-screen bg-black overflow-hidden">
+
+            
     {/* Mobile Sidebar Button */}
     <button className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-gray-900 text-white" onClick={toggleSidebar}>
         {isSidebarOpen ? <AiOutlineClose size={24} /> : <HiMenuAlt3 size={24} />}
@@ -313,20 +321,29 @@ const ChatBot = () => {
         {/* Previous Conversations List */}
         <div className="mt-6 overflow-y-auto" style={{ maxHeight: "calc(100vh - 240px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
             <h3 className="text-sm font-medium text-cyan-400 mb-4">Previous Conversations</h3>
-            {sessions.length > 0 ? (
-                sessions.map((session) => (
-                    <button
-                        key={session.sessionId}
-                        onClick={() => switchToSession(session.sessionId)}
-                        className={`w-full flex items-center justify-between p-2 rounded-lg hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 transition-colors mb-2 text-left ${sessionId === session.sessionId ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600 ring-2' : ''}`}
-                    >
-                        <span className="text-sm text-cyan-400 truncate">{session.sessionName || session.sessionId}</span>
-                        <IoChevronForward className="text-cyan-400" />
-                    </button>
-                ))
-            ) : (
-                <p className="text-sm text-cyan-400 text-center">No previous conversations</p>
-            )}
+            {isLoadingSessions ? (
+    <div className="flex items-center justify-center p-4">
+        <div className="flex gap-2">
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+        </div>
+    </div>
+) : sessions.length > 0 ? (
+    sessions.map((session) => (
+        <button
+            key={session.sessionId}
+            onClick={() => switchToSession(session.sessionId)}
+            className={`w-full flex items-center justify-between p-2 rounded-lg hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 transition-colors mb-2 text-left ${sessionId === session.sessionId ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600 ring-2' : ''}`}
+        >
+            <span className="text-sm text-cyan-400 truncate">{session.sessionName || session.sessionId}</span>
+            <IoChevronForward className="text-cyan-400" />
+        </button>
+    ))
+) : (
+    <p className="text-sm text-cyan-400 text-center">No previous conversations</p>
+)}
+
         </div>
 
         <div className="pt-8">

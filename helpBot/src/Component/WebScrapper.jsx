@@ -162,7 +162,7 @@ const WebScrapper = () => {
       const sanitizedResponse = DOMPurify.sanitize(htmlResponse);
   
       let formattedResponse = `
-        <strong>AI Analysis:</strong><br />${sanitizedResponse}<br /><br />
+        <strong >ZaraX Analysis:</strong><br />${sanitizedResponse}<br /><br />
       `;
   
       if (res.data.urls && res.data.urls.length > 0) {

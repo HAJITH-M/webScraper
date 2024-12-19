@@ -422,23 +422,25 @@ useEffect(() => {
               Files
             </h2>
             {fileTitles.length > 0 && (
-              <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
-                <div className="space-y-2 pr-2">
-                  {fileTitles.map((file, index) => (
-                    <div
-                      key={index}
-                      className={`cursor-pointer text-white p-2 rounded transition-colors ${
-                        selectedFile === file.title 
-                          ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' 
-                          : 'hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600'
-                      }`}
-                      onClick={() => handleFileSelect(file.title)}
-                    >
-                      {file.title}
-                    </div>
-                  ))}
-                </div>
-              </div>            )}
+  <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
+    <div className="space-y-2 pr-2">
+      {[...fileTitles].reverse().map((file, index) => (
+        <div
+          key={index}
+          className={`cursor-pointer text-white p-2 rounded transition-colors ${
+            selectedFile === file.title 
+              ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' 
+              : 'hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600'
+          }`}
+          onClick={() => handleFileSelect(file.title)}
+        >
+          {file.title}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
           </div>
           <div className="mt-auto">
             <Link to="/">
