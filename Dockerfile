@@ -25,8 +25,7 @@ RUN apt-get update && apt-get install -y \
   python3-dev \
   build-essential \
   libpq-dev \
-  xz-utils \  # xz-utils (lzma, xz) for compression tools
-  && apt-get clean
+  xz-utils && apt-get clean
 
 # Remove unnecessary man page creation and symbolic link issues
 RUN apt-get remove -y xz-utils && apt-get autoremove -y && apt-get clean
