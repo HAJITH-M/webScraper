@@ -179,6 +179,7 @@ const WebScrapper = () => {
       }
   
       setResponse(formattedResponse);
+      setSelectedQuestion("")
     } catch (error) {
       if (error.response) {
         console.error("Error Response:", error.response.data);

@@ -30,8 +30,6 @@ const ChatBot = () => {
     const toggleMenu = () => setMenuOpen(!menuOpen);
   const [menuOpen, setMenuOpen] = useState(false);
 
-
-
     const email = token ? jwt_decode.jwtDecode(token).email : null;
 
     useEffect(() => {
@@ -343,7 +341,7 @@ const ChatBot = () => {
                         <span>Logout</span>
                       </button>
                     </Link>
-                  </div>
+        </div>
     </div>
 
     {/* Main Chat Area */}

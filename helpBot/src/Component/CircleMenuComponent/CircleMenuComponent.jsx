@@ -33,10 +33,10 @@ import { useNavigate } from 'react-router-dom';
     
 
     const menuItems = [
-      { icon: <AiOutlineHome />, label: 'HelpBot Hub', onClick: () => window.location.href = '/' },
+      { icon: <AiOutlineHome />, label: 'ZaraX Hub', onClick: () => window.location.href = '/' },
       { icon: <AiOutlineCamera />, label: 'Image Wizard', onClick: () => window.location.href = '/imagegeneration' },
       { icon: <AiOutlineFile />, label: 'File Master', onClick: () => window.location.href = '/fileupload' },
-      { icon: <AiOutlineGlobal />, label: 'Web Explorer', onClick: () => window.location.href = '/WebScrapper' },
+      { icon: <AiOutlineGlobal />, label: 'Web Scraper', onClick: () => window.location.href = '/WebScrapper' },
       { icon: <AiOutlineRobot />, label: 'Chat Assistant', onClick: () => window.location.href = '/chatbot' }
     ];
 
