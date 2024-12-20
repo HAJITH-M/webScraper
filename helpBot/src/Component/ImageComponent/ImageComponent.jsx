@@ -58,7 +58,7 @@ import { PiSignOutDuotone } from "react-icons/pi";
       setIsGenerating(true);
 
       try {
-        const response = await fetch("http://127.0.0.1:5000/generate-image", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/generate-image`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -101,7 +101,7 @@ import { PiSignOutDuotone } from "react-icons/pi";
                 </div>
                 <div className="flex flex-col">
                   <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                    AI Assistant
+                    ZaraX AI
                   </h2>
                   <span className="text-sm text-gray-400">{email}</span>
                 </div>
@@ -171,7 +171,7 @@ import { PiSignOutDuotone } from "react-icons/pi";
             <div className="relative px-4 sm:px-6 py-6 sm:py-6 mx-auto max-w-7xl">
               <div className="text-center mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold mb-2 pb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-text">
-                  AI Image Generator
+                  ZaraX Image Generator
                 </h1>
                 <p className="text-lg text-gray-400 max-w-3xl mx-auto px-4">
                   Create stunning images with our advanced AI technology
