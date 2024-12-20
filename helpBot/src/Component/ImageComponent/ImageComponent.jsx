@@ -58,7 +58,7 @@ import { PiSignOutDuotone } from "react-icons/pi";
       setIsGenerating(true);
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/generate-image`, {
+        const response = await fetch(`${import.meta.env.VITE_APIIMAGE_URL}/generate-image`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
