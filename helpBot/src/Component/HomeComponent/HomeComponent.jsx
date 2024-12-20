@@ -75,9 +75,10 @@
           <div className="relative px-4 sm:px-6 py-6 sm:py-12 mx-auto max-w-7xl">
             <div className="text-center mb-8 sm:mb-16">
 
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 pb-3 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-text animate-fade-in">
-                Welcome to ZaraX
-              </h1>
+                          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 pb-3 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-text animate-fade-in drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300">
+
+                            Welcome to <span className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-[0_0_10px_rgba(25,25,255,0.2)]">ZaraX</span>
+                          </h1>
               <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto px-4">
                 {/* Experience the next generation of AI assistance with our advanced chatbot solution. */}
                 Discover the future of AI support with our cutting-edge chatbot solution.

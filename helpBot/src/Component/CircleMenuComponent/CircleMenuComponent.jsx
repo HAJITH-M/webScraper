@@ -9,9 +9,23 @@ import { useNavigate } from 'react-router-dom';
 
     const navigate = useNavigate();
    
-    
-      
-    
+
+
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        const menu = document.getElementById('circle-menu');
+        if (menu && !menu.contains(event.target) && isOpen) {
+          setIsOpen(false);
+          setIsClicked(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [isOpen]);
 
     const menuItems = [
       { icon: <AiOutlineHome />, label: 'ZaraX Hub', onClick: () => window.location.href = '/' },
@@ -41,6 +55,7 @@ import { useNavigate } from 'react-router-dom';
     return (
       <div className="fixed top-1/2 right-0 transform -translate-y-1/2">
         <div 
+          id="circle-menu"
           className="relative"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
