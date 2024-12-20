@@ -18,7 +18,8 @@ const App = () => {
     <>
     <Router>
       <Routes>
-        <Route path="/" element={<><HomeComponent /> <CircleMenuComponent/> </>} />
+        <Route index element={<><HomeComponent /> <CircleMenuComponent/> </>} />
+        <Route path="/" Component={<><HomeComponent /> <CircleMenuComponent/> </>} />
         <Route path="/WebScrapper" element={<PrivateRoute><WebScrapper /> <CircleMenuComponent/> </PrivateRoute>} />
         <Route path="/fileupload" element={<PrivateRoute><FileExtractor /> <CircleMenuComponent/> </PrivateRoute>} />  
         <Route path="/imagegeneration" element={<PrivateRoute><ImageComponent /> <CircleMenuComponent/> </PrivateRoute>} />  
@@ -37,4 +38,3 @@ const App = () => {
 }
 
 export default App
-

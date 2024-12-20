@@ -28,7 +28,7 @@
     useEffect(() => {
       const token = localStorage.getItem('token');
       if (token) {
-        router('/webscrapper');
+        router('/');
       }
     }, []);
 
@@ -88,7 +88,7 @@
     };
   
     return (
-      <div className="min-h-screen w-full bg-gradient-to-b from-violet-100 via-purple-50 to-violet-200 p-3 flex items-center justify-center overflow-x-hidden relative">
+      <div className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black p-3 flex items-center justify-center overflow-x-hidden relative">
         <div className="absolute inset-0 w-full h-full">
           <Canvas>
             <ambientLight intensity={0.5} />
@@ -104,19 +104,19 @@
           transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
           className="relative w-full max-w-md z-10"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-300 via-purple-300 to-pink-300 rounded-2xl transform rotate-2 blur-lg opacity-60 animate-pulse"></div>
-          <div className="relative bg-white/90 rounded-xl p-6 shadow-2xl border border-violet-200 backdrop-blur-sm hover:border-purple-400 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-600 to-cyan-500 rounded-2xl transform rotate-2 blur-lg opacity-60 animate-pulse"></div>
+          <div className="relative bg-black/90 rounded-xl p-6 shadow-2xl border border-cyan-500 backdrop-blur-sm hover:border-purple-500 transition-all duration-300">
             <motion.h1
               initial={{ y: -20 }}
               animate={{ y: 0 }}
-              className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 mb-6 text-center"
+              className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 mb-6 text-center"
             >
               Sign In
             </motion.h1>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </span>
@@ -125,14 +125,14 @@
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 text-gray-700 bg-white/50 border border-violet-200 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 text-white bg-black/90 border border-cyan-500 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
                   placeholder="Email address"
                 />
               </div>
 
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </span>
@@ -141,21 +141,21 @@
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 text-gray-700 bg-white/50 border border-violet-200 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 text-white bg-black/90 border border-cyan-500 rounded-lg focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
                   placeholder="Password"
                 />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full py-3 text-white font-semibold bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                className="w-full py-3 text-white font-semibold bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg hover:from-cyan-400 hover:to-fuchsia-600 transition-all duration-300"
               >
                 Sign in
               </button>
 
               <div className="text-center">
-                <p className="text-gray-600 mb-4">or sign in with</p>
-                <button className="w-full flex items-center justify-center px-6 py-3 bg-white/50 text-gray-700 border border-violet-200 rounded-lg hover:border-purple-500 transition-all duration-300">
+                <p className="text-cyan-400 mb-4">or sign in with</p>
+                <button className="w-full flex items-center justify-center px-6 py-3 bg-black/90 text-white border border-cyan-500 rounded-lg hover:border-purple-500 transition-all duration-300">
                   <svg className="w-6 h-6 mr-2" viewBox="0 0 40 40">
                     <path d="M36.3425 16.7358H35V16.6667H20V23.3333H29.4192C28.045 27.2142 24.3525 30 20 30C14.4775 30 10 25.5225 10 20C10 14.4775 14.4775 9.99999 20 9.99999C22.5492 9.99999 24.8683 10.9617 26.6342 12.5325L31.3483 7.81833C28.3717 5.04416 24.39 3.33333 20 3.33333C10.7958 3.33333 3.33335 10.7958 3.33335 20C3.33335 29.2042 10.7958 36.6667 20 36.6667C29.2042 36.6667 36.6667 29.2042 36.6667 20C36.6667 18.8825 36.5517 17.7917 36.3425 16.7358Z" fill="#FFC107" />
                     <path d="M5.25497 12.2425L10.7308 16.2583C12.2125 12.59 15.8008 9.99999 20 9.99999C22.5491 9.99999 24.8683 10.9617 26.6341 12.5325L31.3483 7.81833C28.3716 5.04416 24.39 3.33333 20 3.33333C13.5983 3.33333 8.04663 6.94749 5.25497 12.2425Z" fill="#FF3D00" />

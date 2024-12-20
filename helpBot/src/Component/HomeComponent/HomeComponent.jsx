@@ -13,7 +13,7 @@
     }, []);
 
     const handlesubmit = () => {
-      navigate(localStorage.getItem('userEmail') ? '/webscrapper' : '/login');
+      navigate(localStorage.getItem('token') ? '/webscrapper' : '/login');
     }
 
     if (loading) {
