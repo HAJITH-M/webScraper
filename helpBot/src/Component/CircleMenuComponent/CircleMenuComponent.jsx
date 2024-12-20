@@ -8,28 +8,9 @@ import { useNavigate } from 'react-router-dom';
     const [isClicked, setIsClicked] = useState(false);
 
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');
-        const email = token ? jwt_decode.jwtDecode(token).email : null;
+   
     
-        useEffect(() => {
-            const validateToken = () => {
-              const token = localStorage.getItem('token');
-              if (!token) {
-                navigate('/login');
-                return false;
-              }
-              const decodedToken = jwt_decode.jwtDecode(token);
-              if (decodedToken.exp < Date.now() / 1000) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('userEmail');
-                navigate('/login');
-                return false;
-              }
-              return true;
-            };
-        
-            validateToken();
-          }, [navigate]);
+      
     
 
     const menuItems = [

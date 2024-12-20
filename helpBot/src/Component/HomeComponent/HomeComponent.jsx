@@ -8,6 +8,7 @@
     useEffect(() => {
       const timer = setTimeout(() => {
         setLoading(false);
+        navigate('/')
       }, 2000);
       return () => clearTimeout(timer);
     }, []);
