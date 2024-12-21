@@ -16,7 +16,6 @@
     "showSpinner": true,
     "androidSpinnerStyle": "large",
     "iosSpinnerStyle": "small",
-    "spinnerColor": "#999999",
     "splashFullScreen": true,
     "splashImmersive": true
   }

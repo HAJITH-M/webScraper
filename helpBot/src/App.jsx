@@ -14,8 +14,9 @@ import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
 import { App as CapacitorApp } from '@capacitor/app';
 import toast from 'react-hot-toast';
 import { Toast } from '@capacitor/toast';
-import { SplashScreen } from '@capacitor/splash-screen'; // Import the splash screen plugin
+import { Plugins } from '@capacitor/core';
 
+const { SplashScreen } = Plugins;
 
 
 const App = () => {
@@ -23,24 +24,24 @@ const App = () => {
 
   useEffect(() => {
       // Show the splash screen (if it's not already showing)
-      const initApp = async () => {
-        try {
-          await SplashScreen.show({
-            showDuration: 2000,
-            autoHide: false
-          });
-          
-          // Simulate some loading time or wait for your app to be ready
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          // Then hide the splash screen
-          await SplashScreen.hide();
-        } catch (err) {
-          console.error('Error with splash screen:', err);
-        }
-      };
-  
-      initApp();
+       // Show the splash screen
+    const initApp = async () => {
+
+      // Hide the splash (you should do this on app launch)
+      await SplashScreen.hide();
+      
+      // Show the splash for an indefinite amount of time:
+      await SplashScreen.show({
+        autoHide: false,
+      });
+      
+      // Show the splash for two seconds and then automatically hide it:
+      await SplashScreen.show({
+        showDuration: 2000,
+        autoHide: true,
+      });
+    }
+    initApp();
 
     let lastTimeBackPress = 0;
     const handleBackButton = async () => {
