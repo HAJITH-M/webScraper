@@ -14,14 +14,21 @@ import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
 import { App as CapacitorApp } from '@capacitor/app';
 import toast from 'react-hot-toast';
 import { Toast } from '@capacitor/toast';
+import { SplashScreen } from '@capacitor/splash-screen'; // Import the splash screen plugin
+
 
 
 const App = () => {
  
 
   useEffect(() => {
+    // Hide the splash screen once the app is ready
+    const hideSplashScreen = async () => {
+      await SplashScreen.hide(); // Hide the splash screen
+    };
+    hideSplashScreen();
+
     let lastTimeBackPress = 0;
-    
     const handleBackButton = async () => {
       if (window.location.pathname === '/') {
         const currentTime = new Date().getTime();
@@ -41,9 +48,9 @@ const App = () => {
         window.history.back();
       }
     };
-  
+
     const backButtonListener = CapacitorApp.addListener('backButton', handleBackButton);
-  
+
     return () => {
       if (backButtonListener) {
         backButtonListener.remove();
