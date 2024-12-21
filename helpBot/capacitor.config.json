@@ -1,0 +1,9 @@
+{
+  "appId": "com.zaraxai.app",
+  "appName": "ZaraX AI",
+  "webDir": "dist",
+  "server": {
+    "url": "https://zaraxai.vercel.app",
+    "cleartext": true
+  }
+}

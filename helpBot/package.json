@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.1.10",
@@ -21,10 +25,12 @@
     "dompurify": "^3.2.1",
     "ethers": "^6.13.4",
     "framer-motion": "^11.13.1",
+    "install": "^0.13.0",
     "jspdf": "^2.5.2",
     "jwt-decode": "^4.0.0",
     "mammoth": "^1.8.0",
     "marked": "^15.0.2",
+    "npm": "^11.0.0",
     "pdfjs-dist": "^4.9.155",
     "react": "^18.3.1",
     "react-copy-to-clipboard": "^5.1.0",
