@@ -156,7 +156,7 @@
               </div>
             </div>
 
-            <div className="text-center mt-16 sm:mt-24 px-4">
+            <div id='features' className="text-center mt-16 sm:mt-24 px-4">
               <h2 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4 sm:mb-6">
                 Our Powerful Features
               </h2>
@@ -165,7 +165,7 @@
               </p>
             </div>
 
-            <div id='features' className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 px-4" >
+            <div  className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 px-4" >
               {[
                 {
                   title: "Web Scraper",
