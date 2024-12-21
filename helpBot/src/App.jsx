@@ -23,24 +23,24 @@ const App = () => {
 
   useEffect(() => {
       // Show the splash screen (if it's not already showing)
-       // Show the splash screen
-    const initApp = async () => {
-
-      // Hide the splash (you should do this on app launch)
-      await SplashScreen.hide();
-      
-      // Show the splash for an indefinite amount of time:
-      await SplashScreen.show({
-        autoHide: false,
-      });
-      
-      // Show the splash for two seconds and then automatically hide it:
-      await SplashScreen.show({
-        showDuration: 2000,
-        autoHide: true,
-      });
-    }
-    initApp();
+      const initApp = async () => {
+        try {
+          await SplashScreen.show({
+            showDuration: 2000,
+            autoHide: false
+          });
+          
+          // Simulate some loading time or wait for your app to be ready
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Then hide the splash screen
+          await SplashScreen.hide();
+        } catch (err) {
+          console.error('Error with splash screen:', err);
+        }
+      };
+  
+      initApp();
 
     let lastTimeBackPress = 0;
     const handleBackButton = async () => {
