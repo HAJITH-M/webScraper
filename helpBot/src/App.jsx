@@ -22,11 +22,25 @@ const App = () => {
  
 
   useEffect(() => {
-    // Hide the splash screen once the app is ready
-    const hideSplashScreen = async () => {
-      await SplashScreen.hide(); // Hide the splash screen
-    };
-    hideSplashScreen();
+      // Show the splash screen (if it's not already showing)
+      const initApp = async () => {
+        try {
+          await SplashScreen.show({
+            showDuration: 2000,
+            autoHide: false
+          });
+          
+          // Simulate some loading time or wait for your app to be ready
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Then hide the splash screen
+          await SplashScreen.hide();
+        } catch (err) {
+          console.error('Error with splash screen:', err);
+        }
+      };
+  
+      initApp();
 
     let lastTimeBackPress = 0;
     const handleBackButton = async () => {
