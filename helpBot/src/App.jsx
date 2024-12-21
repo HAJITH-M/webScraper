@@ -19,10 +19,10 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<><HomeComponent /> <CircleMenuComponent/> </>} />
-        <Route path="/WebScrapper" element={<PrivateRoute><WebScrapper /> <CircleMenuComponent/> </PrivateRoute>} />
-        <Route path="/fileupload" element={<PrivateRoute><FileExtractor /> <CircleMenuComponent/> </PrivateRoute>} />  
-        <Route path="/imagegeneration" element={<PrivateRoute><ImageComponent /> <CircleMenuComponent/> </PrivateRoute>} />  
-        <Route path="/chatbot" element={<PrivateRoute><ChatBot /> <CircleMenuComponent/> </PrivateRoute>} />  
+        <Route path="/WebScrapper" element={<PrivateRoute><><WebScrapper /> <CircleMenuComponent/> </></PrivateRoute>} />
+        <Route path="/fileupload" element={<PrivateRoute><><FileExtractor /> <CircleMenuComponent/></> </PrivateRoute>} />  
+        <Route path="/imagegeneration" element={<PrivateRoute><><ImageComponent /> <CircleMenuComponent/></> </PrivateRoute>} />  
+        <Route path="/chatbot" element={<PrivateRoute><><ChatBot /> <CircleMenuComponent/></> </PrivateRoute>} />  
         <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Register />} />

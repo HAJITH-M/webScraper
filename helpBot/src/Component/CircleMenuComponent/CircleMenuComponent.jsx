@@ -9,9 +9,6 @@ import { useNavigate } from 'react-router-dom';
 
     const navigate = useNavigate();
    
-
-
-
     useEffect(() => {
       const handleClickOutside = (event) => {
         const menu = document.getElementById('circle-menu');
@@ -72,20 +69,21 @@ import { useNavigate } from 'react-router-dom';
           <div className={`absolute top-0 right-3 transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
             <div className="flex flex-col gap-3">
               {menuItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={item.onClick}
-                  className="w-14 h-14 bg-gradient-to-br from-white to-gray-100 shadow-lg hover:shadow-xl flex items-center justify-center text-purple-500 hover:text-pink-500 rounded-full transform hover:scale-110 transition-all duration-300 group relative cursor-pointer"
-                  style={{ 
-                    transitionDelay: `${index * 0.1}s`
-                  }}
-                >
-                  <span className="text-2xl">{item.icon}</span>
-                  <span className="absolute right-16 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg whitespace-nowrap transform group-hover:translate-x-1">
-                    {item.label}
-                  </span>
-                </button>
-              ))}
+  <div
+    key={index}
+    className="w-14 h-14 bg-gradient-to-br from-white to-gray-100 shadow-lg hover:shadow-xl flex items-center justify-center text-purple-500 hover:text-pink-500 rounded-full transform hover:scale-110 transition-all duration-300 group relative"
+    style={{ 
+      transitionDelay: `${index * 0.1}s`
+    }}
+  >
+    <div onClick={() => navigate(item.path)} className="text-2xl cursor-pointer">
+      {item.icon}
+    </div>
+    <span className="absolute right-16 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg whitespace-nowrap transform group-hover:translate-x-1">
+      {item.label}
+    </span>
+  </div>
+))}
             </div>
           </div>
         </div>

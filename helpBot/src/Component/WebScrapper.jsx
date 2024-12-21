@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PiSignOutDuotone } from "react-icons/pi";
 import { backEndUrl } from "../utils/BackendUrl";
 import { motion } from "framer-motion";
@@ -27,6 +27,20 @@ const WebScrapper = () => {
   const [showNoDataModal, setShowNoDataModal] = useState(false);
 
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
+
+
+  useEffect(()=>{
+    const token = localStorage.getItem("token");
+    if(!token){
+      navigate("/login");
+      
+    }else{
+      setShowScraper(true);
+    }
+
+  })
+
 
   useEffect(() => {
     const handleResize = () => {
