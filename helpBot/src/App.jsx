@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import WebScrapper from "./Component/WebScrapper";
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import FileExtractor from './Component/FileExtractor';
@@ -12,63 +12,31 @@ import HomeComponent from './Component/HomeComponent/HomeComponent';
 import CircleMenuComponent from './Component/CircleMenuComponent/CircleMenuComponent';
 import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
 import { App as CapacitorApp } from '@capacitor/app';
-import toast from 'react-hot-toast';
-import { Toast } from '@capacitor/toast';
-import { Plugins } from '@capacitor/core';
-
-const { SplashScreen } = Plugins;
 
 const App = () => {
-  const [splashHidden, setSplashHidden] = useState(false);
+ 
 
   useEffect(() => {
-    // Show the splash screen and update the state when it's hidden
-    const initApp = async () => {
-      try {
-        // Show the splash screen
-        await SplashScreen.show({
-          showDuration: 2000,
-          autoHide: true
-        });
-
-        // Simulate some loading time or wait for your app to be ready
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Then hide the splash screen
-        await SplashScreen.hide();
-
-        // Update state after splash screen hides
-        setSplashHidden(true);
-      } catch (err) {
-        console.error('Error with splash screen:', err);
-      }
-    };
-
-    initApp();
-
     let lastTimeBackPress = 0;
+    
     const handleBackButton = async () => {
       if (window.location.pathname === '/') {
         const currentTime = new Date().getTime();
-
+        
         if (currentTime - lastTimeBackPress < 2000) {
           await CapacitorApp.exitApp();
         } else {
           lastTimeBackPress = currentTime;
-          // Show toast instead of alert
-          await Toast.show({
-            text: 'Press back again to exit',
-            duration: 'short',
-            position: 'bottom'
-          });
+          // You can add a toast or alert here
+          alert('Press back again to exit');
         }
       } else {
         window.history.back();
       }
     };
-
+  
     const backButtonListener = CapacitorApp.addListener('backButton', handleBackButton);
-
+  
     return () => {
       if (backButtonListener) {
         backButtonListener.remove();
@@ -78,22 +46,18 @@ const App = () => {
 
   return (
     <Router>
-      {splashHidden ? (
-        <Routes>
-          <Route path="/" element={<><HomeComponent /> <CircleMenuComponent /> </>} />
-          <Route path="/WebScrapper" element={<PrivateRoute><><WebScrapper /> <CircleMenuComponent /> </></PrivateRoute>} />
-          <Route path="/fileupload" element={<PrivateRoute><><FileExtractor /> <CircleMenuComponent /></> </PrivateRoute>} />
-          <Route path="/imagegeneration" element={<PrivateRoute><><ImageComponent /> <CircleMenuComponent /></> </PrivateRoute>} />
-          <Route path="/chatbot" element={<PrivateRoute><><ChatBot /> <CircleMenuComponent /></> </PrivateRoute>} />
-          <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register />} />
-          {/* error page */}
-          <Route path="*" element={<ErrorComponent />} />
-        </Routes>
-      ) : (
-        <div>Loading...</div> // You can display a loading state until splash is hidden
-      )}
+      <Routes>
+        <Route path="/" element={<><HomeComponent /> <CircleMenuComponent /> </>} />
+        <Route path="/WebScrapper" element={<PrivateRoute><><WebScrapper /> <CircleMenuComponent /> </></PrivateRoute>} />
+        <Route path="/fileupload" element={<PrivateRoute><><FileExtractor /> <CircleMenuComponent /></> </PrivateRoute>} />
+        <Route path="/imagegeneration" element={<PrivateRoute><><ImageComponent /> <CircleMenuComponent /></> </PrivateRoute>} />
+        <Route path="/chatbot" element={<PrivateRoute><><ChatBot /> <CircleMenuComponent /></> </PrivateRoute>} />
+        <Route path="/logout" element={<PrivateRoute><LogOut /></PrivateRoute>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Register />} />
+        {/* error page */}
+        <Route path="*" element={<ErrorComponent />} />
+      </Routes>
     </Router>
   );
 };
