@@ -12,6 +12,9 @@ import HomeComponent from './Component/HomeComponent/HomeComponent';
 import CircleMenuComponent from './Component/CircleMenuComponent/CircleMenuComponent';
 import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
 import { App as CapacitorApp } from '@capacitor/app';
+import toast from 'react-hot-toast';
+import { Toast } from '@capacitor/toast';
+
 
 const App = () => {
  
@@ -27,8 +30,12 @@ const App = () => {
           await CapacitorApp.exitApp();
         } else {
           lastTimeBackPress = currentTime;
-          // You can add a toast or alert here
-          alert('Press back again to exit');
+          // Show toast instead of alert
+          await Toast.show({
+            text: 'Press back again to exit',
+            duration: 'short',
+            position: 'bottom'
+          });
         }
       } else {
         window.history.back();
