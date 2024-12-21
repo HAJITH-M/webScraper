@@ -156,7 +156,7 @@
               </div>
             </div>
 
-            <div id='features' className="text-center mt-16 sm:mt-24 px-4">
+            <div id='features' className="text-center pt-5 mt-16 sm:mt-24 px-4">
               <h2 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4 sm:mb-6">
                 Our Powerful Features
               </h2>
