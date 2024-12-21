@@ -25,20 +25,21 @@ const App = () => {
       // Show the splash screen (if it's not already showing)
        // Show the splash screen
     const initApp = async () => {
-      try {
-        // Show splash screen for 2 seconds
-        await SplashScreen.show();
-        
-        // Simulate loading process (optional)
-        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Hide splash screen after delay
-        await SplashScreen.hide();
-      } catch (err) {
-        console.error('Error with splash screen:', err);
-      }
-    };
-
+      // Hide the splash (you should do this on app launch)
+      await SplashScreen.hide();
+      
+      // Show the splash for an indefinite amount of time:
+      await SplashScreen.show({
+        autoHide: false,
+      });
+      
+      // Show the splash for two seconds and then automatically hide it:
+      await SplashScreen.show({
+        showDuration: 2000,
+        autoHide: true,
+      });
+    }
     initApp();
 
     let lastTimeBackPress = 0;
