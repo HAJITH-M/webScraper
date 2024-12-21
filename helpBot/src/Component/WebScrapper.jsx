@@ -35,8 +35,6 @@ const WebScrapper = () => {
     if(!token){
       navigate("/login");
       
-    }else{
-      setShowScraper(true);
     }
 
   })
@@ -295,18 +293,18 @@ const WebScrapper = () => {
             <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
               Menu
             </h2>
-            <button
-              className={`w-full text-left p-2 rounded transition-colors mb-2 text-white ${
-
-                showScraper ? 'bg-gradient-to-r from-cyan-500 to-purple-600' : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-fuchsia-600'
-              }`}
-              onClick={() => {
-                setMessage("");
-                setShowScraper(!showScraper);
-              }}
-            >
-              Start Scraping
-            </button>
+            {/* // Then in the sidebar menu button, update it to show the scraper when clicked */}
+<button
+  className={`w-full text-left p-2 rounded transition-colors mb-2 text-white ${
+    showScraper ? 'bg-gradient-to-r from-cyan-500 to-purple-600' : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-fuchsia-600'
+  }`}
+  onClick={() => {
+    setMessage("");
+    setShowScraper(!showScraper);
+  }}
+>
+  Start Scraping
+</button>
             {hasScraped && (
               <button
 
