@@ -73,14 +73,36 @@
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
           </div>
           <div className="relative px-4 sm:px-6 py-6 sm:py-12 mx-auto max-w-7xl">
+            <div className="flex justify-end mb-4">
+              {!localStorage.getItem('token') ? (
+                <div className="space-x-4">
+                  <Link to="/login" className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg hover:opacity-90 transition-all">Login</Link>
+                  <Link to="/signup" className="px-4 py-2 border border-purple-500 rounded-lg hover:bg-purple-500/20 transition-all">Sign Up</Link>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('token')
+                    window.location.reload()
+                  }} 
+                  className="px-4 py-2 bg-red-500/20 border border-red-500 rounded-lg hover:bg-red-500/30 transition-all"
+                >
+                  Logout
+                </button>
+              )}
+            </div>
+
             <div className="text-center mb-8 sm:mb-16">
 
-                          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 pb-3 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-text animate-fade-in drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300">
 
-                            Welcome to <span className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-[0_0_10px_rgba(25,25,255,0.2)]">ZaraX</span>
-                          </h1>
+
+
+
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 pb-3 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-text animate-fade-in drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300">
+                Welcome to <span className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-[0_0_10px_rgba(25,25,255,0.2)]">ZaraX</span>
+              </h1>
               <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto px-4">
-                {/* Experience the next generation of AI assistance with our advanced chatbot solution. */}
+
                 Discover the future of AI support with our cutting-edge chatbot solution.
               </p>
             </div>
@@ -176,7 +198,8 @@
                   path: "/fileupload"
                 }
               ].map((item, index) => (
-                <Link key={index} to={item.path}>
+
+                <Link key={index} to={localStorage.getItem('token') ? item.path : '/login'}>
                   <div 
                     className="group p-4 sm:p-6 bg-black/50 backdrop-blur-sm border border-gray-800 rounded-xl hover:border-purple-500 transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
                   >
@@ -200,7 +223,8 @@
                 onClick={handlesubmit}
                 className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg hover:opacity-90 transition-all text-sm sm:text-base hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
               >
-                Start Your Digital Transformation
+
+                {localStorage.getItem('token') ? 'Access Dashboard' : 'Get Started'}
               </button>
             </div>
           </div>

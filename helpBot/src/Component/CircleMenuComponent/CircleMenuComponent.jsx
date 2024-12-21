@@ -25,12 +25,13 @@ import { useNavigate } from 'react-router-dom';
     }, [isOpen]);
 
     const menuItems = [
-      { icon: <AiOutlineHome />, label: 'ZaraX Hub', onClick: () => window.location.href = '/' },
-      { icon: <AiOutlineCamera />, label: 'Image Wizard', onClick: () => window.location.href = '/imagegeneration' },
-      { icon: <AiOutlineFile />, label: 'File Master', onClick: () => window.location.href = '/fileupload' },
-      { icon: <AiOutlineGlobal />, label: 'Web Scraper', onClick: () => window.location.href = '/WebScrapper' },
-      { icon: <AiOutlineRobot />, label: 'Chat Assistant', onClick: () => window.location.href = '/chatbot' }
+      { icon: <AiOutlineHome className="cursor-pointer" />, label: 'ZaraX Hub', path: '/' },
+      { icon: <AiOutlineCamera className="cursor-pointer" />, label: 'Image Wizard', path: '/imagegeneration' },
+      { icon: <AiOutlineFile className="cursor-pointer" />, label: 'File Master', path: '/fileupload' },
+      { icon: <AiOutlineGlobal className="cursor-pointer" />, label: 'Web Scraper', path: '/WebScrapper' },
+      { icon: <AiOutlineRobot className="cursor-pointer" />, label: 'Chat Assistant', path: '/chatbot' }
     ];
+    
 
     const handleMouseEnter = () => {
       if (!isClicked) {
