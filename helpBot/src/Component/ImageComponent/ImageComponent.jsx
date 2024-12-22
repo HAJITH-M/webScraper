@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { logoutUser } from "../../AuthContext/LogOut";
 import { PiSignOutDuotone } from "react-icons/pi";
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Toast } from "@capacitor/toast";
 
 function ImageComponent() {
   const [prompt, setPrompt] = useState("");
@@ -91,8 +92,12 @@ function ImageComponent() {
       });
 
       // Optional: Show success message
-      alert('Image downloaded successfully!');
-      
+await Toast.show({
+            text: 'Image downloaded successfully',
+            duration: 'short',
+            position: 'bottom'
+          });
+
     } catch (error) {
       console.error('Error downloading image:', error);
       setError('Failed to download image');
