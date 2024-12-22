@@ -5,13 +5,5 @@
   "server": {
     "url": "https://zaraxai.vercel.app",
     "cleartext": true
-  },
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 3000,
-      "backgroundColor": "#your-color",
-      "spinnerColor": "#your-spinner-color",
-      "showSpinner": true
-    }
   }
 }
