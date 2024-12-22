@@ -95,7 +95,7 @@ function ImageComponent() {
         });
         
         await Toast.show({
-          text: 'Press back again to exit',
+          text: 'Image downloaded successfully',
           duration: 'short',
           position: 'bottom'
         });
