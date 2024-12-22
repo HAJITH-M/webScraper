@@ -1,8 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { App as CapacitorApp } from '@capacitor/app';
-import { Toast } from '@capacitor/toast';
-import { SplashScreen } from '@capacitor/splash-screen';
-
+import React, { useEffect } from 'react';
 import WebScrapper from "./Component/WebScrapper";
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import FileExtractor from './Component/FileExtractor';
@@ -15,25 +11,15 @@ import ChatBot from './Component/ChatBot/ChatBot';
 import HomeComponent from './Component/HomeComponent/HomeComponent';
 import CircleMenuComponent from './Component/CircleMenuComponent/CircleMenuComponent';
 import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
+import { App as CapacitorApp } from '@capacitor/app';
 import toast from 'react-hot-toast';
+import { Toast } from '@capacitor/toast';
 
 
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
  
 
   useEffect(() => {
-
-    const initializeApp = async () => {
-      // Any initialization logic here
-      setIsLoading(false);
-      await SplashScreen.hide();
-    };
-
-    initializeApp();
-
-
     let lastTimeBackPress = 0;
     
     const handleBackButton = async () => {
@@ -64,20 +50,6 @@ const App = () => {
       }
     };
   }, []);
-
-
-  if (isLoading) {
-
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white">
-        <img 
-          src="./assets/splash.png" 
-          alt="Loading..." 
-          className="w-24 h-24 animate-spin"
-        />
-      </div>
-    );
-  }
 
   return (
     <Router>
