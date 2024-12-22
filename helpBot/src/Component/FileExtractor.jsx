@@ -359,31 +359,31 @@ useEffect(() => {
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
-          <div className="mb-4 flex items-center">
-            <div className="w-10 h-10 p-1 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white flex items-center justify-center mr-3 flex-shrink-0">
-              {email ? email[0].toUpperCase() : '?'}
+           <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
             </div>
-            <div className="flex-1 overflow-hidden select-none">
-              <input
-                type="email"
-                value={email}
-                readOnly
-                className="w-full p-2 rounded-lg select-none bg-black/50 text-gray-200 border border-gray-800 truncate"
-              />
+            <div >
+            <div className="text-sm font-bold text-cyan-400">File Extractor</div> 
+            <div className="text-sm truncate text-cyan-400">{email || 'Not signed in'}</div>
             </div>
-          </div>          
+            
+        </div>      
           {showFileInput && (
-            <div className="fixed z-10 top-0 left-0 w-full h-full flex bg-black bg-opacity-60 backdrop-blur-sm" onClick={(e) => {
+
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black bg-opacity-60 backdrop-blur-sm" onClick={(e) => {
               if (e.target === e.currentTarget) setShowFileInput(false)
             }}>
-              <div className="extraOutline p-4 bg-black/40 w-max m-auto rounded-lg relative border border-gray-800">
+
+              <div className="w-full max-w-md bg-black/40 rounded-lg relative border border-gray-800 p-4">
                 <button 
                   onClick={() => setShowFileInput(false)}
                   className="absolute top-2 right-2 text-gray-400 hover:text-gray-200"
                 >
                   <AiOutlineClose size={20} />
                 </button>
-                <div className="file_upload p-5 relative border-4 border-dotted border-gray-700 rounded-lg" style={{width: "450px"}}>
+
+                <div className="file_upload p-5 relative border-4 border-dotted border-gray-700 rounded-lg">
                   <svg className="text-indigo-500 w-24 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
@@ -429,6 +429,21 @@ useEffect(() => {
             <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
               Files
             </h2>
+            {fileTitles.length === 0 ? (
+    <div className="text-gray-400 text-center p-4">
+      <p>No files found</p>
+      <button
+        onClick={handleUploadClick}
+        className="mt-2 text-sm text-indigo-400 hover:text-indigo-300"
+      >
+        Upload your first file
+      </button>
+    </div>
+  ) : (
+    <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
+    // ... existing file listing code
+    </div>
+  )}
             {fileTitles.length > 0 && (
   <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
     <div className="space-y-2 pr-2">
@@ -466,6 +481,8 @@ useEffect(() => {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
+          <h1 className="text-center text-2xl text-gray-400 font-light my-4">File Extractor</h1>
+          
           <div className="flex-1 overflow-auto p-6">
             {error && (
               <div
@@ -522,11 +539,11 @@ useEffect(() => {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+
+        </div>      </div>
     </div>  
-    </HelmetProvider>
-    
+
+    </HelmetProvider>    
   );};
 
 export default FileExtractor;

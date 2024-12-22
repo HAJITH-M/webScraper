@@ -317,8 +317,11 @@ const ChatBot = () => {
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 flex items-center justify-center">
                 <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
             </div>
+            <div >
+            <div className="text-sm font-bold text-cyan-400">ZaraX Bot</div> 
             <div className="text-sm truncate text-cyan-400">{email || 'Not signed in'}</div>
-            <div className="text-sm font-bold text-cyan-400">ZaraX Bot</div>
+            </div>
+            
         </div>
 
         {/* New Conversation Button */}

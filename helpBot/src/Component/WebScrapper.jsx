@@ -10,6 +10,7 @@ import { HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoSendSharp } from "react-icons/io5";
 import { HelmetProvider, Helmet } from "react-helmet-async";
+import * as jwt_decode from 'jwt-decode'; // Changed import syntax
 
 
 const WebScrapper = () => {
@@ -30,7 +31,32 @@ const WebScrapper = () => {
 
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
+  const [userInitial, setUserInitial] = useState("");
+  const [email, setEmail] = useState("");
 
+
+  // Extract email from JWT token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwt_decode.jwtDecode(token);
+        const userEmail = decodedToken.email;
+        setEmail(userEmail);
+      } catch (err) {
+        console.error("Error decoding token:", err);
+        setError("Invalid authentication token");
+      }
+    }
+  }, []); // Empty dependency array to run once after the initial render
+
+  useEffect(() => {
+    if (email) {
+      setUserInitial(email[0].toUpperCase());  // Set the initial based on the email's first letter
+    }
+  }, [email]);  // Only runs when the email state is updated
+  
+  
 
   useEffect(()=>{
     const token = localStorage.getItem("token");
@@ -39,7 +65,11 @@ const WebScrapper = () => {
       
     }
 
-  })
+  },[])
+
+
+
+ 
 
 
   useEffect(() => {
@@ -296,8 +326,20 @@ const WebScrapper = () => {
           }`}
         >
           <div className="mb-8">
+    
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
+            </div>
+            <div >
+            <div className="text-sm font-bold text-cyan-400">WebScrapper</div> 
+            <div className="text-sm truncate text-cyan-400">{email || 'Not signed in'}</div>
+            </div>
+            
+        </div>
+    
             <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
-              Menu
+              Web Scrapper
             </h2>
             {/* // Then in the sidebar menu button, update it to show the scraper when clicked */}
 <button
