@@ -45,10 +45,9 @@ const App = () => {
     const backButtonListener = CapacitorApp.addListener('backButton', handleBackButton);
   
     return () => {
-
-
-
-      backButtonListener();
+      if (backButtonListener) {
+        backButtonListener.remove();
+      }
     };
   }, []);
 
