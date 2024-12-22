@@ -8,6 +8,8 @@ import { PiSignOutDuotone } from "react-icons/pi";
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Toast } from "@capacitor/toast";
 import { Capacitor } from '@capacitor/core';
+import { HelmetProvider,Helmet } from "react-helmet-async";
+
 
 
 function ImageComponent() {
@@ -116,6 +118,14 @@ function ImageComponent() {
   };
   
     return (
+      <HelmetProvider>
+      <Helmet>
+        <title>Image Wizard - ZaraX AI</title>
+        <meta name="description" content="Create your account for WebScraper" />
+    </Helmet>
+
+
+
       <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
         {/* Sidebar */}
         <div className="w-full md:w-64 bg-black/50 backdrop-blur-xl border-b md:border-r border-gray-800">
@@ -277,6 +287,7 @@ function ImageComponent() {
           </div>
         </div>
       </div>
+      </HelmetProvider>
     );
   }
 

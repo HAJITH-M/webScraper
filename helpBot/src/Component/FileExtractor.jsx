@@ -10,6 +10,8 @@ import { HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoSendSharp } from "react-icons/io5";
 import * as jwt_decode from 'jwt-decode'; // Changed import syntax
+import { HelmetProvider, Helmet } from "react-helmet-async";
+
 
 const FileExtractor = () => {
   const [file, setFile] = useState(null);
@@ -284,6 +286,12 @@ useEffect(() => {
 
   return (
 
+    <HelmetProvider>
+    <Helmet>
+        <title>File Extractor - ZaraX AI</title>
+        <meta name="description" content="Create your account for WebScraper" />
+    </Helmet>
+
     <div className="min-h-screen w-full bg-black">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px]"></div>
@@ -517,6 +525,7 @@ useEffect(() => {
         </div>
       </div>
     </div>  
+    </HelmetProvider>
     
   );};
 

@@ -1,5 +1,7 @@
   import React, { useState, useEffect } from 'react';
   import { Link, useNavigate } from 'react-router-dom';
+  import { HelmetProvider, Helmet } from "react-helmet-async";
+
 
   const HomeComponent = () => {
     const navigate = useNavigate();
@@ -61,6 +63,12 @@
     }
 
     return (
+      <HelmetProvider>
+      <Helmet>
+        <title>Home - ZaraX AI</title>
+        <meta name="description" content="Create your account for WebScraper" />
+    </Helmet>
+
       <div className="min-h-screen w-full bg-black text-white overflow-x-hidden">
         <div className="w-full relative">
           <div className="absolute inset-0">
@@ -222,6 +230,7 @@
           </div>
         </div>
       </div>
+      </HelmetProvider>
     );
   };
 

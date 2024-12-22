@@ -19,14 +19,20 @@ router.post('/login', async (req, res) => {
             where: { email },
         });
 
-        // If user exists and the password matches
-        if (user && await bcrypt.compare(password, user.password)) {
-            // Generate JWT token with id and email
-            const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
-            res.json({ token });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
+        // If user doesn't exist
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email' });
         }
+
+        // Check password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        // Generate JWT token with id and email
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        res.json({ token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to authenticate user' });
@@ -40,6 +46,14 @@ router.post('/signup', async (req, res) => {
     // Basic validation to check if any field is missing
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Password validation
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({ 
+            error: 'Password must contain at least one number, one special character, and be at least 8 characters long' 
+        });
     }
 
     try {

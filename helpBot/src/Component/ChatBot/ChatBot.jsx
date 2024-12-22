@@ -14,6 +14,8 @@ import * as jwt_decode from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../AuthContext/LogOut';
 import { PiSignOutDuotone } from 'react-icons/pi';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
+
 
 const ChatBot = () => {
     const [query, setQuery] = useState('');
@@ -289,6 +291,14 @@ const ChatBot = () => {
     };
 
     return (
+
+        <HelmetProvider>
+
+<Helmet>
+        <title>ChatBot - ZaraX AI</title>
+        <meta name="description" content="Create your account for WebScraper" />
+    </Helmet>
+
         <div className="flex h-screen bg-black overflow-hidden">
 
             
@@ -401,6 +411,7 @@ const ChatBot = () => {
         </div>
     </div>
 </div>
+</HelmetProvider>
 
     );
 };

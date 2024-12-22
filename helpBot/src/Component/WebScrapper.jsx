@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoSendSharp } from "react-icons/io5";
+import { HelmetProvider, Helmet } from "react-helmet-async";
+
 
 const WebScrapper = () => {
   const [message, setMessage] = useState("");
@@ -241,7 +243,11 @@ const WebScrapper = () => {
   }, [selectedQuestion]);
 
   return (
-
+    <HelmetProvider>
+    <Helmet>
+        <title>WebScrapper - ZaraX AI</title>
+        <meta name="description" content="Create your account for WebScraper" />
+    </Helmet>
 
 
     <div className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black">
@@ -436,6 +442,7 @@ const WebScrapper = () => {
         </div>
       </div>
     </div>
+    </HelmetProvider>
   );
 };
 
