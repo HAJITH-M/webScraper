@@ -7,6 +7,8 @@ import { logoutUser } from "../../AuthContext/LogOut";
 import { PiSignOutDuotone } from "react-icons/pi";
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Toast } from "@capacitor/toast";
+import { Capacitor } from '@capacitor/core';
+
 
 function ImageComponent() {
   const [prompt, setPrompt] = useState("");
@@ -79,31 +81,40 @@ function ImageComponent() {
       setIsGenerating(false);
     }
   };
-
   const handleDownload = async (imageData) => {
-    try {
-      const fileName = `generated-image-${Date.now()}.png`;
-      const base64Data = `data:image/png;base64,${imageData}`;
-      
-      const savedFile = await Filesystem.writeFile({
-        path: fileName,
-        data: base64Data,
-        directory: Directory.Documents
-      });
+    // Check if running in mobile (Capacitor) environment
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const fileName = `generated-image-${Date.now()}.png`;
+        const base64Data = `data:image/png;base64,${imageData}`;
+        
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents
+        });
+        
+        await Toast.show({
+          text: 'Press back again to exit',
+          duration: 'short',
+          position: 'bottom'
+        });
 
-      // Optional: Show success message
-await Toast.show({
-            text: 'Image downloaded successfully',
-            duration: 'short',
-            position: 'bottom'
-          });
-
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      setError('Failed to download image');
+      } catch (error) {
+        console.error('Error saving image:', error);
+        setError('Failed to save image');
+      }
+    } else {
+      // Web browser download implementation
+      const link = document.createElement('a');
+      link.href = `data:image/png;base64,${imageData}`;
+      link.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
-
+  
     return (
       <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
         {/* Sidebar */}
