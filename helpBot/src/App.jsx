@@ -23,15 +23,14 @@ const App = () => {
 
   useEffect(() => {
 
-      // Hide the splash screen after the app is ready
-      const hideSplash = async () => {
-        await SplashScreen.hide();
-      };
-  
-      hideSplash();
-      // Rest of your existing useEffect code...
+    const initializeApp = async () => {
+      // Any initialization logic here
+      setIsLoading(false);
+      await SplashScreen.hide();
+    };
 
-
+    initializeApp();
+    
 
     let lastTimeBackPress = 0;
     
@@ -63,6 +62,11 @@ const App = () => {
       }
     };
   }, []);
+
+
+  if (isLoading) {
+    return <div className="loading-screen">Loading...</div>; // Add styling as needed
+  }
 
   return (
     <Router>
