@@ -1,4 +1,8 @@
 import React, { useEffect } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Toast } from '@capacitor/toast';
+import { SplashScreen } from '@capacitor/splash-screen';
+
 import WebScrapper from "./Component/WebScrapper";
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import FileExtractor from './Component/FileExtractor';
@@ -11,15 +15,24 @@ import ChatBot from './Component/ChatBot/ChatBot';
 import HomeComponent from './Component/HomeComponent/HomeComponent';
 import CircleMenuComponent from './Component/CircleMenuComponent/CircleMenuComponent';
 import ErrorComponent from './Component/ErrorComponent/ErrorComponent';
-import { App as CapacitorApp } from '@capacitor/app';
 import toast from 'react-hot-toast';
-import { Toast } from '@capacitor/toast';
 
 
 const App = () => {
  
 
   useEffect(() => {
+
+      // Hide the splash screen after the app is ready
+      const hideSplash = async () => {
+        await SplashScreen.hide();
+      };
+  
+      hideSplash();
+      // Rest of your existing useEffect code...
+
+
+
     let lastTimeBackPress = 0;
     
     const handleBackButton = async () => {
