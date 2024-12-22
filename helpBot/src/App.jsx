@@ -19,6 +19,8 @@ import toast from 'react-hot-toast';
 
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
  
 
   useEffect(() => {
@@ -30,7 +32,7 @@ const App = () => {
     };
 
     initializeApp();
-    
+
 
     let lastTimeBackPress = 0;
     
