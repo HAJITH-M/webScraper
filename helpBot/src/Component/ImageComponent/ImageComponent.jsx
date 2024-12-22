@@ -6,9 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { logoutUser } from "../../AuthContext/LogOut";
 import { PiSignOutDuotone } from "react-icons/pi";
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { Plugins } from '@capacitor/core';  // Import Plugins from @capacitor/core
-
-const { Permissions } = Plugins;  
+import { Capacitor } from '@capacitor/core';
 
 function ImageComponent() {
   const [prompt, setPrompt] = useState("");
@@ -81,40 +79,30 @@ function ImageComponent() {
     }
   };
 
-  // Function to check permissions (Android)
-  const checkPermissions = async () => {
-    const result = await Permissions.query({ name: 'storage' }); // Check storage permission
-    if (result.state !== 'granted') {
-      const permissionResult = await Permissions.request({ name: 'storage' }); // Request storage permission if not granted
-      if (permissionResult.state !== 'granted') {
-        alert('Permission to access storage is required to save the image.');
-        return false;
-      }
-    }
-    return true;
-  };
-
   const handleDownload = async (imageData) => {
-    const hasPermission = await checkPermissions();  // Ensure permissions are granted
-    if (!hasPermission) return;
-
     try {
-      // Convert the base64 image data to a file
-      const fileName = 'generated-image.png';
-      const filePath = 'images/'; // Change this based on your app's folder structure
-
-      const savedFile = await Filesystem.writeFile({
-        path: `${filePath}${fileName}`,
-        data: imageData,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-      });
-
-      console.log('File saved at: ', savedFile.uri);
-      alert('File saved successfully');
+      if (Capacitor.isNativePlatform()) {
+        // For mobile apps
+        const fileName = `generated-image-${Date.now()}.png`;
+        await Filesystem.writeFile({
+          path: fileName,
+          data: imageData,
+          directory: Directory.Documents,
+          recursive: true
+        });
+        alert('Image saved to Documents folder');
+      } else {
+        // For web browsers
+        const link = document.createElement('a');
+        link.href = `data:image/png;base64,${imageData}`;
+        link.download = `generated-image-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
       console.error('Error saving file: ', error);
-      alert('Failed to save the file');
+      alert('Failed to save the image');
     }
   };
 
