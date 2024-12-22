@@ -350,8 +350,8 @@ const ChatBot = () => {
             onClick={() => switchToSession(session.sessionId)}
             className={`w-full flex items-center justify-between p-2 rounded-lg hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 transition-colors mb-2 text-left ${sessionId === session.sessionId ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600 ring-2' : ''}`}
         >
-            <span className="text-sm text-cyan-400 truncate">{session.sessionName || session.sessionId}</span>
-            <IoChevronForward className="text-cyan-400" />
+            <span className="text-sm text-white truncate">{session.sessionName || session.sessionId}</span>
+            <IoChevronForward className="text-white" />
         </button>
     ))
 ) : (
@@ -377,6 +377,8 @@ const ChatBot = () => {
 
     {/* Main Chat Area */}
     <div className="flex-1 flex flex-col h-screen">
+    <h1 className="text-center text-2xl text-gray-400 font-light my-4">Chat with ZaraX</h1>
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 messages bg-black" style={{ height: "calc(100vh - 100px)" }}>
             {messages.map((msg, index) => renderMessage(msg, index))}

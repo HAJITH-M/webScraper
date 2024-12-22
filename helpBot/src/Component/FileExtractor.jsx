@@ -285,265 +285,265 @@ useEffect(() => {
   };
 
   return (
+      <HelmetProvider>
+      <Helmet>
+          <title>File Extractor - ZaraX AI</title>
+          <meta name="description" content="Create your account for WebScraper" />
+      </Helmet>
 
-    <HelmetProvider>
-    <Helmet>
-        <title>File Extractor - ZaraX AI</title>
-        <meta name="description" content="Create your account for WebScraper" />
-    </Helmet>
-
-    <div className="min-h-screen w-full bg-black">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
-      <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px]"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20"></div>
-{showNoFileModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <motion.div 
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className="bg-black/40 backdrop-blur-md border border-gray-800 rounded-lg p-6 max-w-sm mx-4"
-    >
-      <h3 className="text-xl font-bold mb-4 text-gray-200">Select a File</h3>
-      <p className="text-gray-400 mb-6">Please select a file from the sidebar before submitting your query.</p>
-      <button
-        onClick={() => setShowNoFileModal(false)}
-        className="w-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+      <div className="min-h-screen w-full bg-black">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20"></div>
+  {showNoFileModal && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-black/40 backdrop-blur-md border border-gray-800 rounded-lg p-6 max-w-sm mx-4"
       >
-        Got it
-      </button>
-    </motion.div>
-  </div>
-)}
-
-
-{showNoUploadedFilesModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <motion.div 
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className="bg-black/40 backdrop-blur-md border border-gray-800 rounded-lg p-6 max-w-sm mx-4"
-    >
-      <h3 className="text-xl font-bold mb-4 text-gray-200">Upload a File</h3>
-      <p className="text-gray-400 mb-6">You haven't uploaded any files yet. Would you like to upload one now?</p>
-      <div className="flex gap-4">
+        <h3 className="text-xl font-bold mb-4 text-gray-200">Select a File</h3>
+        <p className="text-gray-400 mb-6">Please select a file from the sidebar before submitting your query.</p>
         <button
-          onClick={() => {
-            setShowNoUploadedFilesModal(false);
-            handleUploadClick();
-          }}
-          className="flex-1 bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+          onClick={() => setShowNoFileModal(false)}
+          className="w-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
         >
-          Upload
+          Got it
         </button>
-        <button
-          onClick={() => setShowNoUploadedFilesModal(false)}
-          className="flex-1 bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-all duration-300"
-        >
-          Cancel
-        </button>
-      </div>
-    </motion.div>
-  </div>
-)}
-      <div className="flex h-screen relative">
-        <button
-          className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-gray-900 text-white"
-          onClick={toggleSidebar}
-        >
-          {isSidebarOpen ? <AiOutlineClose size={24} /> : <HiMenuAlt3 size={24} />}
-        </button>
-
-        <div
-          ref={sidebarRef}
-          className={`fixed lg:relative w-64 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-          }`}
-        >
-           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 flex items-center justify-center">
-                <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
-            </div>
-            <div >
-            <div className="text-sm font-bold text-cyan-400">File Extractor</div> 
-            <div className="text-sm truncate text-cyan-400">{email || 'Not signed in'}</div>
-            </div>
-            
-        </div>      
-          {showFileInput && (
-
-            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black bg-opacity-60 backdrop-blur-sm" onClick={(e) => {
-              if (e.target === e.currentTarget) setShowFileInput(false)
-            }}>
-
-              <div className="w-full max-w-md bg-black/40 rounded-lg relative border border-gray-800 p-4">
-                <button 
-                  onClick={() => setShowFileInput(false)}
-                  className="absolute top-2 right-2 text-gray-400 hover:text-gray-200"
-                >
-                  <AiOutlineClose size={20} />
-                </button>
-
-                <div className="file_upload p-5 relative border-4 border-dotted border-gray-700 rounded-lg">
-                  <svg className="text-indigo-500 w-24 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <div className="input_field flex flex-col w-max mx-auto text-center">
-                    {!file ? (
-                      <label>
-                        <input className="text-sm cursor-pointer w-36 hidden" type="file" onChange={handleFileChange} accept=".pdf,.docx" />
-                        <div className="text bg-indigo-600 text-white border border-gray-700 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-indigo-500">Select</div>
-                      </label>
-                    ) : (
-                      <div className="text-indigo-400 font-semibold truncate max-w-[300px]">{file.name}</div>
-                    )}
-                    {!file && <div className="title text-indigo-500 uppercase">or drop files here</div>}
-                  </div>
-                  {file && (
-                    <button
-                      className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
-                      onClick={() => {
-                        handleFileUpload()
-                        setFile(null)
-                        setShowFileInput(false)
-                      }}
-                      disabled={loadingUpload}
-                    >
-                      {loadingUpload ? "Uploading..." : "Upload"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}          
-           <div className="mb-4">
-            <button
-              className="w-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-4 py-1.5 rounded-md hover:shadow-lg transition-all duration-300 text-sm"
-              onClick={handleUploadClick}
-              disabled={loadingUpload || !email}
-            >
-              Upload File
-            </button>
-          </div>
-
-          <div className="mb-8 flex-1 overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
-              Files
-            </h2>
-            {fileTitles.length === 0 ? (
-    <div className="text-gray-400 text-center p-4">
-      <p>No files found</p>
-      <button
-        onClick={handleUploadClick}
-        className="mt-2 text-sm text-indigo-400 hover:text-indigo-300"
-      >
-        Upload your first file
-      </button>
-    </div>
-  ) : (
-    <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
-    // ... existing file listing code
+      </motion.div>
     </div>
   )}
-            {fileTitles.length > 0 && (
-  <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
-    <div className="space-y-2 pr-2">
-      {[...fileTitles].reverse().map((file, index) => (
-        <div
-          key={index}
-          className={`cursor-pointer text-white p-2 rounded transition-colors ${
-            selectedFile === file.title 
-              ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' 
-              : 'hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600'
-          }`}
-          onClick={() => handleFileSelect(file.title)}
-        >
-          {file.title}
+
+
+  {showNoUploadedFilesModal && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-black/40 backdrop-blur-md border border-gray-800 rounded-lg p-6 max-w-sm mx-4"
+      >
+        <h3 className="text-xl font-bold mb-4 text-gray-200">Upload a File</h3>
+        <p className="text-gray-400 mb-6">You haven't uploaded any files yet. Would you like to upload one now?</p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              setShowNoUploadedFilesModal(false);
+              handleUploadClick();
+            }}
+            className="flex-1 bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+          >
+            Upload
+          </button>
+          <button
+            onClick={() => setShowNoUploadedFilesModal(false)}
+            className="flex-1 bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-all duration-300"
+          >
+            Cancel
+          </button>
         </div>
-      ))}
+      </motion.div>
     </div>
-  </div>
-)}
-
-          </div>
-          <div className="mt-auto">
-            <Link to="/">
-              <button
-                className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-indigo-600 to-purple-600"
-                onClick={toggleMenu}
-                onMouseEnter={() => setHoveredItem("logout")}
-                onMouseLeave={() => setHoveredItem(null)}
-              >
-                {hoveredItem === "logout" && <PiSignOutDuotone className="mr-2" />}
-                <span>Logout</span>
-              </button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <h1 className="text-center text-2xl text-gray-400 font-light my-4">File Extractor</h1>
-          
-          <div className="flex-1 overflow-auto p-6">
-            {error && (
-              <div
-                className="p-4 bg-red-900/50 text-red-300 rounded-lg mb-4 border border-red-800"
-              >
-                {error}
-              </div>
-            )}
-
-            {fileText && (
-              <div
-                className="mb-6 p-4 bg-black/40 rounded-lg shadow-lg border border-gray-800 backdrop-blur-md"
-              >
-                <h2 className="text-xl font-bold mb-2 text-gray-200">Extracted Text</h2>
-
-                <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-transparent text-gray-300">
-                  {fileText}
-                </div>
-              </div>
-            )}
-
-            {queryResponse && (
-              <div
-                className="mb-6 p-4 bg-black/40 rounded-lg shadow-lg border border-gray-800 backdrop-blur-md"
-              >
-                <h2 className="text-xl font-bold mb-2 text-gray-200">Response</h2>
-                <div className="text-gray-300" dangerouslySetInnerHTML={renderMarkdown(queryResponse)} />
-              </div>
-            )}
-          </div>
+  )}
+        <div className="flex h-screen relative">
+          <button
+            className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-gray-900 text-white"
+            onClick={toggleSidebar}
+          >
+            {isSidebarOpen ? <AiOutlineClose size={24} /> : <HiMenuAlt3 size={24} />}
+          </button>
 
           <div
-            className="border-t border-gray-800 bg-black/50 p-4 backdrop-blur-md"
+            ref={sidebarRef}
+            className={`fixed lg:relative w-64 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-xl text-white p-4 flex flex-col z-40 transform transition-transform duration-300 ${
+              isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+            }`}
           >
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                placeholder="Enter your query"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleQuerySubmit();
-                  }
-                }}
-                className="flex-1 p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-black/50 text-gray-200"
-              />
+           <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 flex items-center justify-center">
+                  <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
+              </div>
+              <div >
+                <div className="text-sm font-bold text-cyan-400">File Extractor</div> 
+                <div className="text-sm truncate  text-cyan-400">{email || 'Not signed in'}</div>
+              </div>
+            
+          </div>      
+            {showFileInput && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black bg-opacity-60 backdrop-blur-sm" onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setShowFileInput(false);
+                  setFile(null);
+                }
+              }}>
+                <div className="w-full max-w-md bg-black/40 rounded-lg relative border border-gray-800 p-4">
+                  <button 
+                    onClick={() => {
+                      setShowFileInput(false);
+                      setFile(null);
+                    }}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-200"
+                  >
+                    <AiOutlineClose size={20} />
+                  </button>
+                  <div className="file_upload p-5 relative border-4 border-dotted border-gray-700 rounded-lg">
+                    <svg className="text-indigo-500 w-24 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <div className="input_field flex flex-col w-max mx-auto text-center">
+                      {!file ? (
+                        <label>
+                          <input className="text-sm cursor-pointer w-36 hidden" type="file" onChange={handleFileChange} accept=".pdf,.docx" />
+                          <div className="text bg-indigo-600 text-white border border-gray-700 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-indigo-500">Select</div>
+                        </label>
+                      ) : (
+                        <div className="text-indigo-400 truncate font-semibold text-sm max-w-[200px] overflow-hidden text-ellipsis  whitespace-nowrap">{file.name}</div>
+                      )}
+                      {!file && <div className="title text-indigo-500 uppercase">or drop files here</div>}
+                    </div>
+                    {file && (
+                      <button
+                        className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+                        onClick={() => {
+                          handleFileUpload()
+                          setFile(null)
+                          setShowFileInput(false)
+                        }}
+                        disabled={loadingUpload}
+                      >
+                        {loadingUpload ? "Uploading..." : "Upload"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}          
+           <div className="mb-4">
               <button
-                className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
-                onClick={handleQuerySubmit}
-                disabled={loadingQuery || !query}
+                className="w-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-4 py-1.5 rounded-md hover:shadow-lg transition-all duration-300 text-sm"
+                onClick={handleUploadClick}
+                disabled={loadingUpload || !email}
               >
-                <IoSendSharp size={20} />
+                Upload File
               </button>
+            </div>
+
+            <div className="mb-8 flex-1 overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
+                Files
+              </h2>
+              {fileTitles.length === 0 ? (
+      <div className="text-gray-400 text-center p-4">
+        <p>No files found</p>
+        <button
+          onClick={handleUploadClick}
+          className="mt-2 text-sm text-indigo-400 hover:text-indigo-300"
+        >
+          Upload your first file
+        </button>
+      </div>
+    ) : (
+      <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
+      {/* // ... existing file listing code */}
+      </div>
+    )}
+              {fileTitles.length > 0 && (
+    <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)", scrollbarWidth: "thin", scrollbarColor: "#4F46E5 transparent" }}>
+      <div className="space-y-2 pr-2">
+        {[...fileTitles].reverse().map((file, index) => (
+          <div
+            key={index}
+            className={`cursor-pointer truncate text-white p-2 rounded transition-colors ${
+              selectedFile === file.title 
+                ? 'bg-gradient-to-r from-indigo-600 to-fuchsia-600' 
+                : 'hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600'
+            }`}
+            onClick={() => handleFileSelect(file.title)}
+          >
+            {file.title}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+            </div>
+            <div className="mt-auto">
+              <Link to="/">
+                <button
+                  className="w-full text-left p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-fuchsia-600 rounded transition-colors flex items-center text-white bg-gradient-to-r from-indigo-600 to-purple-600"
+                  onClick={toggleMenu}
+                  onMouseEnter={() => setHoveredItem("logout")}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  {hoveredItem === "logout" && <PiSignOutDuotone className="mr-2" />}
+                  <span>Logout</span>
+                </button>
+              </Link>
             </div>
           </div>
 
-        </div>      </div>
-    </div>  
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <h1 className="text-center text-2xl text-gray-400 font-light my-4">File Extractor</h1>
+          
+            <div className="flex-1 overflow-auto p-6">
+              {error && (
+                <div
+                  className="p-4 bg-red-900/50 text-red-300 rounded-lg mb-4 border border-red-800"
+                >
+                  {error}
+                </div>
+              )}
 
-    </HelmetProvider>    
-  );};
+              {fileText && (
+                <div
+                  className="mb-6 p-4 bg-black/40 rounded-lg shadow-lg border border-gray-800 backdrop-blur-md"
+                >
+                  <h2 className="text-xl font-bold mb-2 text-gray-200">Extracted Text</h2>
+
+                  <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-transparent text-gray-300">
+                    {fileText}
+                  </div>
+                </div>
+              )}
+
+              {queryResponse && (
+                <div
+                  className="mb-6 p-4 bg-black/40 rounded-lg shadow-lg border border-gray-800 backdrop-blur-md"
+                >
+                  <h2 className="text-xl font-bold mb-2 text-gray-200">ZaraX Analysis</h2>
+                  <div className="text-gray-300" dangerouslySetInnerHTML={renderMarkdown(queryResponse)} />
+                </div>
+              )}
+            </div>
+
+            <div
+              className="border-t border-gray-800 bg-black/50 p-4 backdrop-blur-md"
+            >
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  placeholder="Enter your query"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleQuerySubmit();
+                    }
+                  }}
+                  className="flex-1 p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-black/50 text-gray-200"
+                />
+                <button
+                  className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                  onClick={handleQuerySubmit}
+                  disabled={loadingQuery || !query}
+                >
+                  <IoSendSharp size={20} />
+                </button>
+              </div>
+            </div>
+
+          </div>      </div>
+      </div>  
+      </HelmetProvider>  );};
 
 export default FileExtractor;

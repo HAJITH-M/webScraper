@@ -275,7 +275,7 @@ const WebScrapper = () => {
   return (
     <HelmetProvider>
     <Helmet>
-        <title>WebScrapper - ZaraX AI</title>
+        <title>WebScraper - ZaraX AI</title>
         <meta name="description" content="Create your account for WebScraper" />
     </Helmet>
 
@@ -332,14 +332,14 @@ const WebScrapper = () => {
                 <span className="text-white text-lg font-semibold">{email ? email[0].toUpperCase() : '?'}</span>
             </div>
             <div >
-            <div className="text-sm font-bold text-cyan-400">WebScrapper</div> 
+            <div className="text-sm font-bold text-cyan-400">WebScraper</div> 
             <div className="text-sm truncate text-cyan-400">{email || 'Not signed in'}</div>
             </div>
             
         </div>
     
             <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
-              Web Scrapper
+              Web Scraper
             </h2>
             {/* // Then in the sidebar menu button, update it to show the scraper when clicked */}
 <button
@@ -384,6 +384,8 @@ const WebScrapper = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
+        <h1 className="text-center text-2xl text-gray-400 font-light my-4">WebScraper</h1>
+
           {/* Chat Container */}
           <div className="flex-1 overflow-auto p-6">
             {response && (
