@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate JWT token with id and email
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30s' });
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
         res.json({ token });
     } catch (err) {
         console.error(err);
@@ -80,7 +80,7 @@ router.post('/signup', async (req, res) => {
 
         // Generate JWT token for the new user with id and email
         const token = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, {
-            expiresIn: '30s',
+            expiresIn: '15m',
         });
 
         res.status(201).json({ msg: "User registered successfully", token });
